@@ -1,0 +1,266 @@
+{
+	"ABI version": 2,
+	"header": ["pubkey", "time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+				{"name":"souintA","type":"uint256"},
+				{"name":"souintB","type":"uint256"},
+				{"name":"gramsDeployConnector","type":"uint128"},
+				{"name":"gramsDeployWallet","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getConnectorAddress",
+			"inputs": [
+				{"name":"_answer_id","type":"uint32"},
+				{"name":"connectorSoArg","type":"uint256"}
+			],
+			"outputs": [
+				{"name":"value0","type":"address"}
+			]
+		},
+		{
+			"name": "connectCallback",
+			"inputs": [
+				{"name":"wallet","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "connect",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getQuotient",
+			"inputs": [
+				{"name":"min","type":"uint128"},
+				{"name":"max","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint128"}
+			]
+		},
+		{
+			"name": "getRemainder",
+			"inputs": [
+				{"name":"min","type":"uint128"},
+				{"name":"max","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint128"}
+			]
+		},
+		{
+			"name": "tokensReceivedCallback",
+			"inputs": [
+				{"name":"token_wallet","type":"address"},
+				{"name":"token_root","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"sender_public_key","type":"uint256"},
+				{"name":"sender_address","type":"address"},
+				{"name":"sender_wallet","type":"address"},
+				{"name":"original_gas_to","type":"address"},
+				{"name":"updated_balance","type":"uint128"},
+				{"name":"payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "burnCallback",
+			"inputs": [
+				{"name":"tokens","type":"uint128"},
+				{"name":"payload","type":"cell"},
+				{"name":"sender_public_key","type":"uint256"},
+				{"name":"sender_address","type":"address"},
+				{"name":"wallet_address","type":"address"},
+				{"name":"send_gas_to","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getCallback",
+			"inputs": [
+				{"name":"id","type":"uint256"}
+			],
+			"outputs": [
+				{"name":"token_wallet","type":"address"},
+				{"name":"token_root","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"sender_public_key","type":"uint256"},
+				{"name":"sender_address","type":"address"},
+				{"name":"sender_wallet","type":"address"},
+				{"name":"original_gas_to","type":"address"},
+				{"name":"updated_balance","type":"uint128"},
+				{"name":"payload_arg0","type":"uint8"},
+				{"name":"payload_arg1","type":"address"},
+				{"name":"payload_arg2","type":"address"}
+			]
+		},
+		{
+			"name": "getBalance",
+			"inputs": [
+				{"name":"_answer_id","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"value0","type":"uint128"}
+			]
+		},
+		{
+			"name": "rootDEX",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"rootDEX","type":"address"}
+			]
+		},
+		{
+			"name": "soUINT",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"soUINT","type":"uint256"}
+			]
+		},
+		{
+			"name": "creator",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"creator","type":"address"}
+			]
+		},
+		{
+			"name": "codeDEXConnector",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"codeDEXConnector","type":"cell"}
+			]
+		},
+		{
+			"name": "rootA",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"rootA","type":"address"}
+			]
+		},
+		{
+			"name": "rootB",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"rootB","type":"address"}
+			]
+		},
+		{
+			"name": "rootAB",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"rootAB","type":"address"}
+			]
+		},
+		{
+			"name": "walletReserve",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"walletReserve","type":"map(address,address)"}
+			]
+		},
+		{
+			"name": "syncStatus",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"syncStatus","type":"map(address,bool)"}
+			]
+		},
+		{
+			"name": "balanceReserve",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"balanceReserve","type":"map(address,uint128)"}
+			]
+		},
+		{
+			"name": "totalSupply",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"totalSupply","type":"uint128"}
+			]
+		},
+		{
+			"name": "processingStatus",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"processingStatus","type":"map(address,map(address,bool))"}
+			]
+		},
+		{
+			"name": "processingData",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"processingData","type":"map(address,map(address,uint128))"}
+			]
+		},
+		{
+			"name": "processingDest",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"processingDest","type":"map(address,map(address,address))"}
+			]
+		},
+		{
+			"name": "rootConnector",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"rootConnector","type":"map(address,address)"}
+			]
+		},
+		{
+			"name": "connectors",
+			"inputs": [
+			],
+			"outputs": [
+				{"components":[{"name":"root_address","type":"address"},{"name":"souint","type":"uint256"},{"name":"status","type":"bool"}],"name":"connectors","type":"map(address,tuple)"}
+			]
+		},
+		{
+			"name": "counterCallback",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"counterCallback","type":"uint256"}
+			]
+		}
+	],
+	"data": [
+		{"key":1,"name":"rootDEX","type":"address"},
+		{"key":2,"name":"soUINT","type":"uint256"},
+		{"key":3,"name":"creator","type":"address"},
+		{"key":4,"name":"codeDEXConnector","type":"cell"},
+		{"key":5,"name":"rootA","type":"address"},
+		{"key":6,"name":"rootB","type":"address"},
+		{"key":7,"name":"rootAB","type":"address"}
+	],
+	"events": [
+	]
+}

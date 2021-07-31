@@ -1,0 +1,1 @@
+tondev sol compile DEXClient.sol && tondev sol compile DEXConnector.sol && tondev sol compile DEXPair.sol && tondev sol compile DEXRoot.sol && tondev sol compile RootTokenContract.sol && tondev sol compile TONTokenWallet.sol

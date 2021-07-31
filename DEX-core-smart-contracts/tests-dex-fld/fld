@@ -1,0 +1,5 @@
+git clone git@github.com:FreeTON-Network/fld.ton.dev.git
+cd ~/fld.ton.dev/scripts/
+Marvin=0:deda155da7c518f57cb664be70b9042ed54a92542769735dfb73d3eef85acdaf
+DST_ACCOUNT=0:30d40a62fa94bd7745d7e67c3e7666a599b9ba39f108ce95fccafe4ecc764397 
+tonos-cli call "$Marvin" grant "{\"addr\":\"$DST_ACCOUNT\"}" --abi Marvin.abi.json
