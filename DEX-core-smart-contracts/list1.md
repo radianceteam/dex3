@@ -43,13 +43,13 @@ Hi, I had a first look at the contracts, and here is a first list of comments:
     + change logic for deposit
 
         `uint128 constant public GRAMS_CREATE_DEX_CLIENT = 1 ton;`
-        
+
         `mapping(address => uint128) public balanceOf;`
 
         `mapping(address => uint256) public hashOf;`
 
         `receive() external {
-          require (!(msg.value < GRAMS_CREATE_DEX_CLIENT), 107)
+          require (!(msg.value < GRAMS_CREATE_DEX_CLIENT), 107);
           balanceOf[msg.sender] += msg.value;
           TvmSlice slice = msg.data;
           if (!slice.empty()) {
