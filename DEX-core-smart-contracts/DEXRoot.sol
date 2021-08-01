@@ -40,12 +40,6 @@ contract DEXroot is IDEXRoot {
 	// Grams constants
 	uint128 constant public GRAMS_CREATE_DEX_CLIENT = 1 ton;
 
-	// Modifier that allows public function to accept external calls always.
-	modifier alwaysAccept {
-		tvm.accept();
-		_;
-	}
-
 	// Modifier that allows public function to accept external calls only from the contract owner.
 	modifier checkOwnerAndAccept {
 		require(msg.pubkey() == tvm.pubkey(), 101);
@@ -53,7 +47,7 @@ contract DEXroot is IDEXRoot {
 		_;
 	}
 
-	// Modifier that allows public function to accept external signed calls only.
+	// Modifier that allows only signed external public calls.
 	modifier checkNotEmptyPubkey {
 		require(msg.pubkey() != 0, 103);
 		_;
@@ -100,11 +94,6 @@ contract DEXroot is IDEXRoot {
 	function setTONTokenWalletCode(TvmCell code) public checkOwnerAndAccept {
 		codeTONTokenWallet = code;
 	}
-
-	// function setCreator(address giverAddr) public checkCreatorAndAccept {
-	// 	uint256 pubkey = msg.pubkey();
-	// 	creators[pubkey] = giverAddr;
-	// }
 
 	function computeClientAddress(uint256 pubkey, uint256 souint) private inline view returns (address) {
 		TvmCell stateInit = tvm.buildStateInit({
