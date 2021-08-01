@@ -69,29 +69,31 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   mapping(address => Pair) public pairs;
   address[] public pairKeys;
 
-  // Modifier that allows public function to accept any external calls.
-  modifier alwaysAccept {
-    tvm.accept();
-    _;
-  }
-
-  // Modifier that allows only owner to accept any external calls.
   modifier checkOwnerAndAccept {
     require(msg.pubkey() == tvm.pubkey(), 102);
     tvm.accept();
     _;
   }
 
-  // Modifier that check owner.
   modifier checkOwner {
     require(msg.pubkey() == tvm.pubkey(), 107);
     _;
   }
 
-
-  // Modifier that allows only owner's wallet to accept this external calls.
   modifier checkWalletAndAccept {
     require(rootWallet.exits(msg.sender), 104);
+    tvm.accept();
+    _;
+  }
+
+  modifier checkPairAndAccept {
+    require(pairs.exits(msg.sender), 108);
+    tvm.accept();
+    _;
+  }
+
+  modifier checkConnectorAndAccept {
+    require(connectors.exits(msg.sender), 109);
     tvm.accept();
     _;
   }
@@ -135,18 +137,16 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
 	}
 
   // Callback for DEXpair to set connection data.
-  function setPair(address arg0, address arg1, address arg2, address arg3, address arg4) public alwaysAccept override {
+  function setPair(address arg0, address arg1, address arg2, address arg3, address arg4) public checkPairAndAccept override {
     address dexpair = msg.sender;
-    if (pairs.exists(dexpair)){
-      Pair cp = pairs[dexpair];
-      cp.status = true;
-      cp.rootA = arg0;
-      cp.walletA = arg1;
-      cp.rootB = arg2;
-      cp.walletB = arg3;
-      cp.rootAB = arg4;
-      pairs[dexpair] = cp;
-    }
+    Pair cp = pairs[dexpair];
+    cp.status = true;
+    cp.rootA = arg0;
+    cp.walletA = arg1;
+    cp.rootB = arg2;
+    cp.walletB = arg3;
+    cp.rootAB = arg4;
+    pairs[dexpair] = cp;
   }
 
   // Function for compute connector address
@@ -189,20 +189,18 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   }
 
   // Function for callback from DEX Connector in process connect to Root
-  function connectCallback(address wallet) public override alwaysAccept {
+  function connectCallback(address wallet) public override checkConnectorAndAccept {
     address connector = msg.sender;
-    if (connectors.exists(connector)) {
-      Connector cc = connectors[connector];
-      rootKeys.push(cc.root_address);
-      rootWallet[cc.root_address] = wallet;
-      rootConnector[cc.root_address] = connector;
-      TvmCell bodySTC = tvm.encodeBody(IDEXConnector(connector).setTransferCallback);
-      connector.transfer({value: GRAMS_SET_CALLBACK_ADDR, bounce:true, flag: 0, body:bodySTC});
-      TvmCell bodySBC = tvm.encodeBody(IDEXConnector(connector).setBouncedCallback);
-      connector.transfer({value: GRAMS_SET_CALLBACK_ADDR, bounce:true, flag: 0, body:bodySBC});
-      cc.status = true;
-      connectors[connector] = cc;
-    }
+    Connector cc = connectors[connector];
+    rootKeys.push(cc.root_address);
+    rootWallet[cc.root_address] = wallet;
+    rootConnector[cc.root_address] = connector;
+    TvmCell bodySTC = tvm.encodeBody(IDEXConnector(connector).setTransferCallback);
+    connector.transfer({value: GRAMS_SET_CALLBACK_ADDR, bounce:true, flag: 0, body:bodySTC});
+    TvmCell bodySBC = tvm.encodeBody(IDEXConnector(connector).setBouncedCallback);
+    connector.transfer({value: GRAMS_SET_CALLBACK_ADDR, bounce:true, flag: 0, body:bodySBC});
+    cc.status = true;
+    connectors[connector] = cc;
   }
 
   // Function to check DEXclient for swap processing.
@@ -223,7 +221,7 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
 
 
   // Function to get all connected pairs and created wallets of DEXclient.
-  function getAllDataPreparation() public view alwaysAccept returns(address[] pairKeysR, address[] rootKeysR){
+  function getAllDataPreparation() public view returns(address[] pairKeysR, address[] rootKeysR){
     pairKeysR = pairKeys;
     rootKeysR = rootKeys;
   }
@@ -387,7 +385,7 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   }
 
   // Function to get connected pair data.
-  function getPairData(address pairAddr) public view alwaysAccept returns (
+  function getPairData(address pairAddr) public view returns (
     bool pairStatus,
     address pairRootA,
     address pairWalletA,
