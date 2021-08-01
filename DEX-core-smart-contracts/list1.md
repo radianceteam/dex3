@@ -14,7 +14,7 @@ Hi, I had a first look at the contracts, and here is a first list of comments:
     should check a minimal value (note that createDEXclient will
     fail if this amount is smaller than 0.0031 ton)
 
-    + add `require (!(msg.value < MIN_DEPOSIT), 107)`
+    + add `require (!(msg.value < GRAMS_CREATE_DEX_CLIENT), 107)`
 
  * checkCreatorAndAccept only checks a non-empty pubkey. When used
     in setCreator(), it consumes small amounts of tokens. Attackers
@@ -42,11 +42,13 @@ Hi, I had a first look at the contracts, and here is a first list of comments:
 
     + change logic for deposit
 
-      `	uint128 constant public GRAMS_CREATE_DEX_CLIENT = 1 ton;
-        mapping(address => uint128) public balanceOf;
-        mapping(address => uint256) public hashOf;
+        `uint128 constant public GRAMS_CREATE_DEX_CLIENT = 1 ton;`
+        
+        `mapping(address => uint128) public balanceOf;`
 
-        receive() external {
+        `mapping(address => uint256) public hashOf;`
+
+        `receive() external {
           require (!(msg.value < GRAMS_CREATE_DEX_CLIENT), 107)
           balanceOf[msg.sender] += msg.value;
           TvmSlice slice = msg.data;
@@ -54,14 +56,14 @@ Hi, I had a first look at the contracts, and here is a first list of comments:
             (uint32 functionId, string message) = slice.decode(uint32, string);
             hashOf[msg.sender] = sha256(message);
           }
-        }
+        }`
 
-        function hashOfPubKey(uint256 pubKey) private inline pure returns (uint256) {
+        `function hashOfPubKey(uint256 pubKey) private inline pure returns (uint256) {
           string stringFromPubKey = format("{:x}", pubKey);
           return sha256(stringFromPubKey);
-        }
+        }`
 
-        function createDEXclient(address giver, uint256 souint) public checkNotEmptyPubkey returns (address deployedAddress, bool statusCreate){
+        `function createDEXclient(address giver, uint256 souint) public checkNotEmptyPubkey returns (address deployedAddress, bool statusCreate){
           require (!pubkeys.exists(msg.pubkey()) && hashOf.exists(giver) && !(balanceOf[giver] < GRAMS_CREATE_DEX_CLIENT) && hashOf[giver] == hashOfPubKey(msg.pubkey()), 106);
           tvm.accept();
           uint256 pubkey = msg.pubkey();
@@ -87,7 +89,6 @@ Hi, I had a first look at the contracts, and here is a first list of comments:
           delete balanceOf[giver];
           delete hashOf[giver];
         }`
-
 
  * DEXRoot has a soUINT static fields, so why are all functions
    taking a different souint parameters ? Since createDEXclient
