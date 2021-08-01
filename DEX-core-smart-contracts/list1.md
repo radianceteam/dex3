@@ -68,14 +68,12 @@ Hi, I had a first look at the contracts, and here is a first list of comments:
             statusCreate = false;
             deployedAddress = address(0);
             uint128 prepay = balanceOf[giver];
-
             TvmCell stateInit = tvm.buildStateInit({
               contr: DEXClient,
               varInit: {rootDEX:address(this), soUINT:souint, codeDEXConnector:codeDEXconnector},
               code: codeDEXclient,
               pubkey: pubkey
             });
-
             deployedAddress = new DEXClient{
               stateInit: stateInit,
               flag: 0,
@@ -88,7 +86,6 @@ Hi, I had a first look at the contracts, and here is a first list of comments:
             statusCreate = true;
             delete balanceOf[giver];
             delete hashOf[giver];
-
           }`
 
  * DEXRoot has a soUINT static fields, so why are all functions
