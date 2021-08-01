@@ -16,8 +16,8 @@ contract DEXConnector is IExpectedWalletAddressCallback, IDEXConnector {
   address static public dexclient;
 
   // Grams constants
-  uint128 constant GRAMS_TO_ROOT = 500000000;
-  uint128 constant GRAMS_TO_NEW_WALLET = 250000000;
+  uint128 constant GRAMS_TO_ROOT = 0.5 ton;
+  uint128 constant GRAMS_TO_NEW_WALLET = 0.25 ton;
 
   address public drivenRoot;
   address public driven;

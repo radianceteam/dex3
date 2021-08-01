@@ -40,55 +40,90 @@ Hi, I had a first look at the contracts, and here is a first list of comments:
            delete balanceOf[A_addr]
     A ---> createDEXclient ( A_pubkey, 0 ): fails
 
-    + change logic for deposit
+      + change logic for deposit
 
-        `uint128 constant public GRAMS_CREATE_DEX_CLIENT = 1 ton;`
+          `uint128 constant public GRAMS_CREATE_DEX_CLIENT = 1 ton;`
 
-        `mapping(address => uint128) public balanceOf;`
+          `mapping(address => uint128) public balanceOf;`
 
-        `mapping(address => uint256) public hashOf;`
+          `mapping(address => uint256) public hashOf;`
 
-        `receive() external {
-          require (!(msg.value < GRAMS_CREATE_DEX_CLIENT), 107);
-          balanceOf[msg.sender] += msg.value;
-          TvmSlice slice = msg.data;
-          if (!slice.empty()) {
-            (uint32 functionId, string message) = slice.decode(uint32, string);
-            hashOf[msg.sender] = sha256(message);
-          }
-        }`
+          `receive() external {
 
-        `function hashOfPubKey(uint256 pubKey) private inline pure returns (uint256) {
-          string stringFromPubKey = format("{:x}", pubKey);
-          return sha256(stringFromPubKey);
-        }`
+            require (!(msg.value < GRAMS_CREATE_DEX_CLIENT), 107);
 
-        `function createDEXclient(address giver, uint256 souint) public checkNotEmptyPubkey returns (address deployedAddress, bool statusCreate){
-          require (!pubkeys.exists(msg.pubkey()) && hashOf.exists(giver) && !(balanceOf[giver] < GRAMS_CREATE_DEX_CLIENT) && hashOf[giver] == hashOfPubKey(msg.pubkey()), 106);
-          tvm.accept();
-          uint256 pubkey = msg.pubkey();
-          statusCreate = false;
-          deployedAddress = address(0);
-          uint128 prepay = balanceOf[giver];
-          TvmCell stateInit = tvm.buildStateInit({
-            contr: DEXClient,
-            varInit: {rootDEX:address(this), soUINT:souint, codeDEXConnector:codeDEXconnector},
-            code: codeDEXclient,
-            pubkey: pubkey
-          });
-          deployedAddress = new DEXClient{
-            stateInit: stateInit,
-            flag: 0,
-            bounce : false,
-            value : (prepay - 3100000)
-          }();
-          pubkeys[pubkey] = deployedAddress;
-          clients[deployedAddress] = pubkey;
-          clientKeys.push(deployedAddress);
-          statusCreate = true;
-          delete balanceOf[giver];
-          delete hashOf[giver];
-        }`
+            balanceOf[msg.sender] += msg.value;
+
+            TvmSlice slice = msg.data;
+
+            if (!slice.empty()) {
+              (uint32 functionId, string message) = slice.decode(uint32, string);
+
+              hashOf[msg.sender] = sha256(message);
+
+            }
+
+          }`
+
+          `function hashOfPubKey(uint256 pubKey) private inline pure returns (uint256) {
+
+            string stringFromPubKey = format("{:x}", pubKey);
+
+            return sha256(stringFromPubKey);
+
+          }`
+
+          `function createDEXclient(address giver, uint256 souint) public checkNotEmptyPubkey returns (address deployedAddress, bool statusCreate){
+
+            require (!pubkeys.exists(msg.pubkey()) && hashOf.exists(giver) && !(balanceOf[giver] < GRAMS_CREATE_DEX_CLIENT) && hashOf[giver] == hashOfPubKey(msg.pubkey()), 106);
+
+            tvm.accept();
+
+            uint256 pubkey = msg.pubkey();
+
+            statusCreate = false;
+
+            deployedAddress = address(0);
+
+            uint128 prepay = balanceOf[giver];
+
+            TvmCell stateInit = tvm.buildStateInit({
+
+              contr: DEXClient,
+
+              varInit: {rootDEX:address(this), soUINT:souint, codeDEXConnector:codeDEXconnector},
+
+              code: codeDEXclient,
+
+              pubkey: pubkey
+
+            });
+
+            deployedAddress = new DEXClient{
+
+              stateInit: stateInit,
+
+              flag: 0,
+
+              bounce : false,
+
+              value : (prepay - 3100000)
+
+            }();
+
+            pubkeys[pubkey] = deployedAddress;
+
+            clients[deployedAddress] = pubkey;
+
+            clientKeys.push(deployedAddress);
+
+            statusCreate = true;
+
+            delete balanceOf[giver];
+
+            delete hashOf[giver];
+
+          }`
 
  * DEXRoot has a soUINT static fields, so why are all functions
    taking a different souint parameters ? Since createDEXclient
@@ -96,29 +131,103 @@ Hi, I had a first look at the contracts, and here is a first list of comments:
    it prevents users from creating two DEXClient for the same key,
    even with different souint parameters.
 
+   + this need for sharding optimization for each created DexClient and require `!pubkeys.exists(msg.pubkey())` prevents users from creating two DEXClient for the same key
 
  * In general, we think that amounts should not be written in
    nanotons, because it is hard to count zeroes. 0.5 ton is
    more readable and less errorprone than 500000000.
 
+   + change all const to format with ton
+
 * Contract DEXClient:
   * function tokensReceivedCallback is "alwaysAccept":
+
    * An attacker can use it to spend the balance of the contract
      by providing big arguments, especially using the payload
      argument whose size is not bounded
+
+
    * An attacker can send random data to delete correct callbacks
      from the callbacks mapping, as it is limited to 10 entries,
      before the user has time to collect them.
-  * in general, modifier alwaysAccept should never be used. It can be
-     used:
-     * to consume the balance of the contract by iterating calls to
-       view methods
-     * to increase the cost of executing the contract, by storing
-       useless information in the contract, that will be deserialized
-       everytime the contract is used. For example, setPair and
-       connectCallback can be used this way.
+
+   * in general, modifier alwaysAccept should never be used. It can be
+      used:
+      * to consume the balance of the contract by iterating calls to
+        view methods
+      * to increase the cost of executing the contract, by storing
+        useless information in the contract, that will be deserialized
+        everytime the contract is used. For example, setPair and
+        connectCallback can be used this way.
+
+
+         + change `alwaysAccept` to `checkWalletAndAccept`
+
+           `modifier checkWalletAndAccept {
+
+             require(rootWallet.exits(msg.sender), 104);
+
+             tvm.accept();
+
+             _;
+
+           }`
+
   * accept() should never be used before require(): if the require
     fails, every shard in the system will execute the message and
     decrease the balance of the contract. It's an efficent way to
     empty the balance.  createNewPair has such require() after
     checkOwnerAndAccept.
+
+    + change `checkOwnerAndAccept` to `checkOwner` and replace `tvm.accept()` after require
+
+      `modifier checkOwner {
+
+        require(msg.pubkey() == tvm.pubkey(), 107);
+
+        _;
+
+      }`
+
+      `function createNewPair(
+
+        address root0,
+        address root1,
+
+        uint256 pairSoArg,
+
+        uint256 connectorSoArg0,
+
+        uint256 connectorSoArg1,
+
+        uint256 rootSoArg,
+
+        bytes rootName,
+
+        bytes rootSymbol,
+
+        uint8 rootDecimals,
+
+        uint128 grammsForPair,
+
+        uint128 grammsForRoot,
+
+        uint128 grammsForConnector,
+
+        uint128 grammsForWallet,
+
+        uint128 grammsTotal
+
+      ) public view checkOwner  {
+
+        require (!(grammsTotal < (grammsForPair+2*grammsForConnector+2*grammsForWallet+grammsForRoot)) && !(grammsTotal < 5 ton),106);
+
+        require (!(address(this).balance < grammsTotal),105);
+
+        tvm.accept();
+
+        TvmCell body = tvm.encodeBody(IDEXRoot(rootDEX).createDEXpair, root0,root1,pairSoArg,connectorSoArg0,connectorSoArg1,rootSoArg,rootName,rootSymbol,rootDecimals,grammsForPair,grammsForRoot,grammsForConnector,grammsForWallet);
+
+        rootDEX.transfer({value:grammsTotal, bounce:false, flag: 1, body:body});
+
+      }`

@@ -62,10 +62,10 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
   mapping (uint => Callback) callbacks;
 
   // Grams constants
-  uint128 constant GRAMS_SET_CALLBACK_ADDR = 500000000;
-  uint128 constant GRAMS_SEND_UNUSED_RETURN = 100000000;
-  uint128 constant GRAMS_MINT = 50000000;
-  uint128 constant GRAMS_RETURN = 200000000;
+  uint128 constant GRAMS_SET_CALLBACK_ADDR = 0.5 ton;
+  uint128 constant GRAMS_SEND_UNUSED_RETURN = 0.1 ton;
+  uint128 constant GRAMS_MINT = 0.05 ton;
+  uint128 constant GRAMS_RETURN = 0.2 ton;
 
   // Modifier that allows public function to accept any external calls.
   modifier alwaysAccept {

@@ -20,11 +20,11 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   TvmCell static public codeDEXConnector;
 
   // Grams constants
-  uint128 constant GRAMS_CONNECT_PAIR = 500000000;
-  uint128 constant GRAMS_SET_CALLBACK_ADDR = 100000000;
-  uint128 constant GRAMS_SWAP = 500000000;
-  uint128 constant GRAMS_PROCESS_LIQUIDITY = 500000000;
-  uint128 constant GRAMS_RETURN_LIQUIDITY = 500000000;
+  uint128 constant GRAMS_CONNECT_PAIR = 0.5 ton;
+  uint128 constant GRAMS_SET_CALLBACK_ADDR = 0.1 ton;
+  uint128 constant GRAMS_SWAP = 0.5 ton;
+  uint128 constant GRAMS_PROCESS_LIQUIDITY = 0.5 ton;
+  uint128 constant GRAMS_RETURN_LIQUIDITY = 0.5 ton;
 
   struct Connector {
     address root_address;
@@ -78,6 +78,20 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   // Modifier that allows only owner to accept any external calls.
   modifier checkOwnerAndAccept {
     require(msg.pubkey() == tvm.pubkey(), 102);
+    tvm.accept();
+    _;
+  }
+
+  // Modifier that check owner.
+  modifier checkOwner {
+    require(msg.pubkey() == tvm.pubkey(), 107);
+    _;
+  }
+
+
+  // Modifier that allows only owner's wallet to accept this external calls.
+  modifier checkWalletAndAccept {
+    require(rootWallet.exits(msg.sender), 104);
     tvm.accept();
     _;
   }
@@ -290,7 +304,7 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
     address original_gas_to,
     uint128 updated_balance,
     TvmCell payload
-  ) public override alwaysAccept {
+  ) public override checkWalletAndAccept {
     Callback cc = callbacks[counterCallback];
     cc.token_wallet = token_wallet;
     cc.token_root = token_root;
@@ -364,9 +378,10 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
 		uint128 grammsForConnector,
 		uint128 grammsForWallet,
     uint128 grammsTotal
-  ) public view checkOwnerAndAccept  {
+  ) public view checkOwner  {
     require (!(grammsTotal < (grammsForPair+2*grammsForConnector+2*grammsForWallet+grammsForRoot)) && !(grammsTotal < 5 ton),106);
     require (!(address(this).balance < grammsTotal),105);
+    tvm.accept();
     TvmCell body = tvm.encodeBody(IDEXRoot(rootDEX).createDEXpair, root0,root1,pairSoArg,connectorSoArg0,connectorSoArg1,rootSoArg,rootName,rootSymbol,rootDecimals,grammsForPair,grammsForRoot,grammsForConnector,grammsForWallet);
     rootDEX.transfer({value:grammsTotal, bounce:false, flag: 1, body:body});
   }
