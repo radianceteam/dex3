@@ -26,15 +26,15 @@ async function main(client) {
   let resultArr = JSON.parse(fs.readFileSync(pathJsonClient,{encoding: "utf8"}));
   const pairAddr = JSON.parse(fs.readFileSync(currentPairPath,{encoding: "utf8"})).address;
 
-  // for (const item of resultArr) {
-    const item = resultArr[0];
+  for (const item of resultArr) {
+    // const item = resultArr[0];
     const clientKeys = item.keys;
     const clientAddr = item.address;
     const clientAcc = new Account(DEXClientContract, {address:clientAddr,signer:clientKeys,client,});
     responce = await clientAcc.run("connectPair", {pairAddr:pairAddr});
     console.log("Contract reacted to your connectPair:", responce.decoded.output);
 
-  // }
+  }
 
 }
 

@@ -54,8 +54,8 @@ async function main(client) {
 
 
   let clientCount = 0;
-  // for (const item of resultArr) {
-    const item = resultArr[0];
+  for (const item of resultArr) {
+    // const item = resultArr[0];
     console.log("======DEX client count:", clientCount);
     const clientKeys = item.keys;
     const clientAddr = item.address;
@@ -72,8 +72,8 @@ async function main(client) {
     response = await clientAcc.runLocal("getBalance", {_answer_id:0});
     console.log(" TON balance:", response.decoded.output);
 
-  //   clientCount++;
-  // }
+    clientCount++;
+  }
 
 }
 

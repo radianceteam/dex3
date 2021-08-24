@@ -55,13 +55,13 @@ async function main(client) {
   console.log("rootKeysB:", rootKeysB);
 
 
-  // for (const item of resultArr) {
-    // const clientKeys = item.keys;
-    const clientKeys = resultArr[0].keys;
-    console.log("clientKeys:", clientKeys);
+  for (const item of resultArr) {
+    const clientKeys = item.keys;
+    // const clientKeys = resultArr[0].keys;
+    // console.log("clientKeys:", clientKeys);
 
-    // const clientAddr = item.address;
-    const clientAddr = resultArr[0].address;
+    const clientAddr = item.address;
+    // const clientAddr = resultArr[0].address;
     console.log("clientAddr:", clientAddr);
 
     const clientAcc = new Account(DEXClientContract, {address:clientAddr,signer:clientKeys,client,});
@@ -90,7 +90,7 @@ async function main(client) {
     response = await rootAccB.run("mint", {tokens:usdprovide, to:walletRootB});
     console.log(`Contract rootAccB run mint with tx ${response.decoded.output}, ${response.transaction.id}`);
 
-  // }
+  }
 
 }
 

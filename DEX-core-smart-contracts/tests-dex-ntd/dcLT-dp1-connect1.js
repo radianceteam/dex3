@@ -3,7 +3,7 @@ const { libNode } = require("@tonclient/lib-node");
 const { Account } = require("@tonclient/appkit");
 const { DEXClientContract } = require("./DEXClient.js");
 const { DEXConnectorContract } = require("./DEXConnector.js");
-const { RootTokenContract } = require("./RootTokenContract.js");
+const { RootTokenContractContract } = require("./RootTokenContract.js");
 const dotenv = require('dotenv').config();
 const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
 const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
@@ -67,9 +67,9 @@ async function main(client) {
     console.log("Pair rootB:", rootB);
     console.log("Pair rootAB:", rootAB);
 
-    const rootA_Acc = new Account(RootTokenContract,{address:rootA,client,});
-    const rootB_Acc = new Account(RootTokenContract,{address:rootB,client,});
-    const rootAB_Acc = new Account(RootTokenContract,{address:rootAB,client,});
+    const rootA_Acc = new Account(RootTokenContractContract,{address:rootA,client,});
+    const rootB_Acc = new Account(RootTokenContractContract,{address:rootB,client,});
+    const rootAB_Acc = new Account(RootTokenContractContract,{address:rootAB,client,});
 
     let targetShard = getShard(clientAddr);
 
@@ -146,13 +146,13 @@ async function main(client) {
     }
 
 
-    response = await clientAcc.run("connectRoot", {root:rootA,souint:connectorSoArg0,gramsToConnector:500000000,gramsToRoot:1500000000});
+    response = await clientAcc.run("connectRoot", {root:rootA,souint:connectorSoArg0,gramsToConnector:1000000000,gramsToRoot:3200000000});
     console.log("Contract reacted to your connectRoot:", response.decoded.output);
 
-    response = await clientAcc.run("connectRoot", {root:rootB,souint:connectorSoArg1,gramsToConnector:500000000,gramsToRoot:1500000000});
+    response = await clientAcc.run("connectRoot", {root:rootB,souint:connectorSoArg1,gramsToConnector:1000000000,gramsToRoot:3200000000});
     console.log("Contract reacted to your connectRoot:", response.decoded.output);
 
-    response = await clientAcc.run("connectRoot", {root:rootAB,souint:connectorSoArg2,gramsToConnector:500000000,gramsToRoot:1500000000});
+    response = await clientAcc.run("connectRoot", {root:rootAB,souint:connectorSoArg2,gramsToConnector:1000000000,gramsToRoot:3200000000});
     console.log("Contract reacted to your connectRoot:", response.decoded.output);
 
     console.log("connectorSoArgArr1: ", connectorSoArgArr1);

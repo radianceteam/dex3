@@ -149,13 +149,13 @@ async function main(client) {
     }
 
 
-    response = await clientAcc.run("connectRoot", {root:rootA,souint:connectorSoArg0,gramsToConnector:500000000,gramsToRoot:1500000000});
+    response = await clientAcc.run("connectRoot", {root:rootA,souint:connectorSoArg0,gramsToConnector:1000000000,gramsToRoot:3200000000});
     console.log("Contract reacted to your connectRoot:", response.decoded.output);
 
-    response = await clientAcc.run("connectRoot", {root:rootB,souint:connectorSoArg1,gramsToConnector:500000000,gramsToRoot:1500000000});
+    response = await clientAcc.run("connectRoot", {root:rootB,souint:connectorSoArg1,gramsToConnector:1000000000,gramsToRoot:3200000000});
     console.log("Contract reacted to your connectRoot:", response.decoded.output);
 
-    response = await clientAcc.run("connectRoot", {root:rootAB,souint:connectorSoArg2,gramsToConnector:500000000,gramsToRoot:1500000000});
+    response = await clientAcc.run("connectRoot", {root:rootAB,souint:connectorSoArg2,gramsToConnector:1000000000,gramsToRoot:3200000000});
     console.log("Contract reacted to your connectRoot:", response.decoded.output);
 
     console.log("connectorSoArgArr2: ", connectorSoArgArr2);

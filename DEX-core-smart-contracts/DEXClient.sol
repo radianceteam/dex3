@@ -32,7 +32,6 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   uint128 constant public MIN_BALANCE = 1 ton;
   uint128 constant public SET_CALLBACK_TO_ROOT = 0.5 ton;
 
-
   struct Connector {
     address root_address;
     uint256 souint;
@@ -76,8 +75,14 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   mapping(address => Pair) public pairs;
   address[] public pairKeys;
 
+  // Function for check internal owner.
+  function isInternalOwner(address forCheck) private inline view returns (bool) {
+    return owner != address(0) && forCheck == owner;
+  }
+
+
   modifier checkOwnerAndAccept {
-    require(msg.pubkey() == tvm.pubkey(), 102);
+    require(msg.pubkey() == tvm.pubkey() || isInternalOwner(msg.sender), 102);
     tvm.accept();
     _;
   }

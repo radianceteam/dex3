@@ -45,10 +45,14 @@ async function main(client) {
   let resultArr = JSON.parse(fs.readFileSync(pathJsonClient,{encoding: "utf8"}));
   const pairAddr = JSON.parse(fs.readFileSync(currentPairPath,{encoding: "utf8"})).address;
 
-  // for (const item of resultArr) {
-    const item = resultArr[0];
+  resultArr.splice(0, 4);
+
+  for (const item of resultArr) {
+    // const item = resultArr[0];
     const clientKeys = item.keys;
     const clientAddr = item.address;
+    console.log("clientAddr:", clientAddr);
+
     const clientAcc = new Account(DEXClientContract, {address:clientAddr,signer:clientKeys,client,});
     // let k = 0;
     // response = await clientAcc.runLocal("getAllDataPreparation", {});
@@ -154,7 +158,7 @@ async function main(client) {
     fs.writeFileSync( pathJsonClientSoData, connectorSoArgArrJson,{flag:'w'});
     console.log("connectorSoArgArr written successfully to:", pathJsonClientSoData);
 
-  // }
+  }
 
 }
 

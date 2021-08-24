@@ -4,7 +4,7 @@ const { Account } = require("@tonclient/appkit");
 const { DEXRootContract } = require("./DEXRoot.js");
 const { DEXClientContract } = require("./DEXClient.js");
 const { DEXConnectorContract } = require("./DEXConnector.js");
-const { RootTokenContract } = require("./RootTokenContract.js");
+const { RootTokenContractContract } = require("./RootTokenContract.js");
 const { GiverContract } = require("./Giver.js");
 const dotenv = require('dotenv').config();
 const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
@@ -59,9 +59,9 @@ async function main(client) {
   let pubkey = '0x'+clientKeys.keys.public;
 
   const rootA = JSON.parse(fs.readFileSync(currentRootA,{encoding: "utf8"})).address;
-  const rootA_Acc = new Account(RootTokenContract, {address: rootA,client,});
+  const rootA_Acc = new Account(RootTokenContractContract, {address: rootA,client,});
   const rootB = JSON.parse(fs.readFileSync(currentRootB,{encoding: "utf8"})).address;
-  const rootB_Acc = new Account(RootTokenContract, {address: rootB,client,});
+  const rootB_Acc = new Account(RootTokenContractContract, {address: rootB,client,});
 
 
 

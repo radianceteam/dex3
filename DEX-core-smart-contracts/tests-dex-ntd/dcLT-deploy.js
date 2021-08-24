@@ -91,9 +91,9 @@ async function main(client) {
   const rootAddr = JSON.parse(fs.readFileSync(pathJsonRoot,{encoding: "utf8"})).address;
   const rootAcc = new Account(DEXRootContract, {address: rootAddr,client,});
 
-  // for (const item of resultArr) {
+  for (const item of resultArr) {
 
-    const item = resultArr[0];
+    // const item = resultArr[0];
     const clientKeys = item.keys;
     let pubkey = '0x'+clientKeys.keys.public;
     const clientSoArg = item.clientSoArg;
@@ -148,7 +148,7 @@ async function main(client) {
 
     } else {console.log('networkSelector is incorrect');}
 
-  // }
+  }
 
 }
 
