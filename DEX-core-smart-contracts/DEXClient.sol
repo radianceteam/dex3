@@ -1,4 +1,4 @@
-pragma ton-solidity ^0.45.0;
+pragma ton-solidity >= 0.45.0;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 pragma AbiHeader time;
@@ -19,12 +19,19 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   uint256 static public soUINT;
   TvmCell static public codeDEXConnector;
 
+  address public owner;
+
   // Grams constants
-  uint128 constant GRAMS_CONNECT_PAIR = 0.5 ton;
-  uint128 constant GRAMS_SET_CALLBACK_ADDR = 0.1 ton;
-  uint128 constant GRAMS_SWAP = 0.5 ton;
-  uint128 constant GRAMS_PROCESS_LIQUIDITY = 0.5 ton;
-  uint128 constant GRAMS_RETURN_LIQUIDITY = 0.5 ton;
+  uint128 constant public GRAMS_CONNECT_PAIR = 1.5 ton;
+  uint128 constant public GRAMS_SET_CALLBACK_ADDR = 0.3 ton;
+  uint128 constant public GRAMS_SWAP = 1.5 ton;
+  uint128 constant public GRAMS_PROCESS_LIQUIDITY = 1.5 ton;
+  uint128 constant public GRAMS_RETURN_LIQUIDITY = 1.5 ton;
+  uint128 constant public MIN_GRAMS_TO_CONNECT_ROOT = 3.0 ton;
+  uint128 constant public MIN_GRAMS_TO_CREATE_CONNECTOR = 1.0 ton;
+  uint128 constant public MIN_BALANCE = 1 ton;
+  uint128 constant public SET_CALLBACK_TO_ROOT = 0.5 ton;
+
 
   struct Connector {
     address root_address;
@@ -81,31 +88,42 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   }
 
   modifier checkWalletAndAccept {
-    require(rootWallet.exits(msg.sender), 104);
-    tvm.accept();
+    require(rootWallet.exists(msg.sender), 104);
+    tvm.rawReserve(address(this).balance - msg.value, 2);
     _;
   }
 
   modifier checkPairAndAccept {
-    require(pairs.exits(msg.sender), 108);
-    tvm.accept();
+    require(pairs.exists(msg.sender), 108);
+    tvm.rawReserve(address(this).balance - msg.value, 2);
     _;
   }
 
   modifier checkConnectorAndAccept {
-    require(connectors.exits(msg.sender), 109);
-    tvm.accept();
+    require(connectors.exists(msg.sender), 109);
+    tvm.rawReserve(address(this).balance - msg.value, 2);
     _;
   }
 
-  constructor() public {
-    require(msg.sender == rootDEX, 103);
-    tvm.accept();
-    counterCallback = 0;
+  constructor(address ownerAddr) public {
+    if (msg.sender == rootDEX) {
+      tvm.rawReserve(address(this).balance + MIN_BALANCE - msg.value, 2);
+      owner = ownerAddr;
+      counterCallback = 0;
+      TvmCell body = tvm.encodeBody(IDEXRoot(rootDEX).createDEXclientCallback, tvm.pubkey(), address(this), owner);
+      rootDEX.transfer({value: 0, flag: 128, body:body});
+    } else {
+      tvm.accept();
+      owner = address(0);
+      counterCallback = 0;
+      TvmCell body = tvm.encodeBody(IDEXRoot(rootDEX).createDEXclientCallback, tvm.pubkey(), address(this), owner);
+      rootDEX.transfer({value: SET_CALLBACK_TO_ROOT, flag: 0, body:body});
+    }
   }
 
   // Function to connect DEXClient to new DEXPair.
   function connectPair(address pairAddr) public checkOwnerAndAccept  returns (bool statusConnection) {
+    require (address(this).balance >= GRAMS_CONNECT_PAIR, 110);
     statusConnection = false;
     if (!pairs.exists(pairAddr)){
       Pair cp = pairs[pairAddr];
@@ -118,23 +136,11 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
     }
   }
 
-  // Function to get Quotient of division
-  function getQuotient(uint128 arg0, uint128 arg1, uint128 arg2) private inline pure returns (uint128) {
-    (uint128 quotient, ) = math.muldivmod(arg0, arg1, arg2);
-    return quotient;
-  }
-
-  // Function to get Remainder of division
-  function getRemainder(uint128 arg0, uint128 arg1, uint128 arg2) private inline pure returns (uint128) {
-    (, uint128 remainder) = math.muldivmod(arg0, arg1, arg2);
-    return remainder;
-  }
-
   // Function for get first callback id.
-  function getFirstCallback() private view returns (uint) {
-		optional(uint, Callback) rc = callbacks.min();
-		if (rc.hasValue()) {(uint number, ) = rc.get();return number;} else {return 0;}
-	}
+  function getFirstCallback() private inline view returns (uint) {
+    optional(uint, Callback) rc = callbacks.min();
+    if (rc.hasValue()) {(uint number, ) = rc.get();return number;} else {return 0;}
+  }
 
   // Callback for DEXpair to set connection data.
   function setPair(address arg0, address arg1, address arg2, address arg3, address arg4) public checkPairAndAccept override {
@@ -167,6 +173,7 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
 
   // Function for connect to Root
   function connectRoot(address root, uint256 souint, uint128 gramsToConnector, uint128 gramsToRoot) public checkOwnerAndAccept returns (bool statusConnected){
+    require (gramsToConnector >= MIN_GRAMS_TO_CREATE_CONNECTOR && gramsToRoot >= MIN_GRAMS_TO_CONNECT_ROOT && address(this).balance >= (gramsToConnector + gramsToRoot), 111);
     statusConnected = false;
     if (!rootWallet.exists(root)) {
       TvmCell stateInit = tvm.buildStateInit({
@@ -208,7 +215,8 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
     Pair cp = pairs[pair];
     Connector ccA = connectors[rootConnector[cp.rootA]];
     Connector ccB = connectors[rootConnector[cp.rootB]];
-    return cp.status && rootWallet.exists(cp.rootA) && rootWallet.exists(cp.rootB) && rootConnector.exists(cp.rootA) && rootConnector.exists(cp.rootB) && ccA.status && ccB.status;
+    return cp.status && rootWallet.exists(cp.rootA) && rootWallet.exists(cp.rootB) && rootConnector.exists(cp.rootA)
+    && rootConnector.exists(cp.rootB) && ccA.status && ccB.status;
   }
 
   // Function to check DEXclient for provide liquidity processing.
@@ -216,7 +224,8 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
     Pair cp = pairs[pair];
     Connector ccA = connectors[rootConnector[cp.rootA]];
     Connector ccB = connectors[rootConnector[cp.rootB]];
-    return cp.status && rootWallet.exists(cp.rootA) && rootWallet.exists(cp.rootB) && rootWallet.exists(cp.rootAB) && rootConnector.exists(cp.rootA) && rootConnector.exists(cp.rootB) && ccA.status && ccB.status;
+    return cp.status && rootWallet.exists(cp.rootA) && rootWallet.exists(cp.rootB) && rootWallet.exists(cp.rootAB)
+    && rootConnector.exists(cp.rootA) && rootConnector.exists(cp.rootB) && ccA.status && ccB.status;
   }
 
 
@@ -228,6 +237,7 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
 
   // Function to swap A.
   function processSwapA(address pairAddr, uint128 qtyA) public view checkOwnerAndAccept returns (bool processSwapStatus) {
+    require (address(this).balance >= GRAMS_SWAP, 112);
     processSwapStatus = false;
     if (isReady(pairAddr)) {
       Pair cp = pairs[pairAddr];
@@ -243,6 +253,7 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
 
   // Function to swap B.
   function processSwapB(address pairAddr, uint128 qtyB) public view checkOwnerAndAccept returns (bool processSwapStatus) {
+    require (address(this).balance >= GRAMS_SWAP, 112);
     processSwapStatus = false;
     if (isReady(pairAddr)) {
       Pair cp = pairs[pairAddr];
@@ -281,13 +292,13 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   function returnLiquidity(address pairAddr, uint128 tokens) public view checkOwnerAndAccept returns (bool returnLiquidityStatus) {
     returnLiquidityStatus = false;
     if (isReadyToProvide(pairAddr)) {
-    Pair cp = pairs[pairAddr];
-    TvmBuilder builder;
-    builder.store(uint8(3), rootWallet[cp.rootA], rootWallet[cp.rootB]);
-    TvmCell callback_payload = builder.toCell();
-    TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[cp.rootAB]).burn, tokens, pairAddr, callback_payload);
-    rootConnector[cp.rootAB].transfer({value:GRAMS_RETURN_LIQUIDITY, body:body});
-    returnLiquidityStatus = true;
+      Pair cp = pairs[pairAddr];
+      TvmBuilder builder;
+      builder.store(uint8(3), rootWallet[cp.rootA], rootWallet[cp.rootB]);
+      TvmCell callback_payload = builder.toCell();
+      TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[cp.rootAB]).burn, tokens, pairAddr, callback_payload);
+      rootConnector[cp.rootAB].transfer({value:GRAMS_RETURN_LIQUIDITY, body:body});
+      returnLiquidityStatus = true;
     }
   }
 
@@ -363,25 +374,25 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
   // Function to create DEXpair by DEXclient via DEXroot.
   function createNewPair(
     address root0,
-		address root1,
-		uint256 pairSoArg,
-		uint256 connectorSoArg0,
-		uint256 connectorSoArg1,
-		uint256 rootSoArg,
-		bytes rootName,
-		bytes rootSymbol,
-		uint8 rootDecimals,
-		uint128 grammsForPair,
-		uint128 grammsForRoot,
-		uint128 grammsForConnector,
-		uint128 grammsForWallet,
+    address root1,
+    uint256 pairSoArg,
+    uint256 connectorSoArg0,
+    uint256 connectorSoArg1,
+    uint256 rootSoArg,
+    bytes rootName,
+    bytes rootSymbol,
+    uint8 rootDecimals,
+    uint128 grammsForPair,
+    uint128 grammsForRoot,
+    uint128 grammsForConnector,
+    uint128 grammsForWallet,
     uint128 grammsTotal
   ) public view checkOwner  {
     require (!(grammsTotal < (grammsForPair+2*grammsForConnector+2*grammsForWallet+grammsForRoot)) && !(grammsTotal < 5 ton),106);
     require (!(address(this).balance < grammsTotal),105);
     tvm.accept();
     TvmCell body = tvm.encodeBody(IDEXRoot(rootDEX).createDEXpair, root0,root1,pairSoArg,connectorSoArg0,connectorSoArg1,rootSoArg,rootName,rootSymbol,rootDecimals,grammsForPair,grammsForRoot,grammsForConnector,grammsForWallet);
-    rootDEX.transfer({value:grammsTotal, bounce:false, flag: 1, body:body});
+    rootDEX.transfer({value:grammsTotal, bounce: true, flag: 1, body:body});
   }
 
   // Function to get connected pair data.
@@ -416,6 +427,10 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect {
       connector.transfer({value: grams, bounce:true, body:body});
       sendTokenStatus = true;
     }
+  }
+
+  function sendTransaction(address dest, uint128 value, bool bounce, uint8 flags, TvmCell payload) public pure checkOwnerAndAccept {
+    dest.transfer(value, bounce, flags, payload);
   }
 
   // Function to receive plain transfers.

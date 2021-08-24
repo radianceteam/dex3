@@ -4,7 +4,7 @@ const { Account } = require("@tonclient/appkit");
 const { DEXRootContract } = require("./DEXRoot.js");
 const { DEXClientContract } = require("./DEXClient.js");
 const { DEXConnectorContract } = require("./DEXConnector.js");
-const { RootTokenContract } = require("./RootTokenContract.js");
+const { RootTokenContractContract } = require("./RootTokenContract.js");
 const { GiverContract } = require("./Giver.js");
 const dotenv = require('dotenv').config();
 const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
@@ -65,7 +65,22 @@ async function main(client) {
 
 
 
-  response = await clientAcc.run("createNewPair", {root0:rootA,root1:rootB,pairSoArg:pair.pairSoArg,connectorSoArg0:pair.connectorSoArg0,connectorSoArg1:pair.connectorSoArg1,rootSoArg:pair.rootSoArg,rootName:pair.rootName,rootSymbol:pair.rootSymbol,rootDecimals:pair.rootDecimals,grammsForPair:500000000,grammsForRoot:500000000,grammsForConnector:500000000,grammsForWallet:1500000000,grammsTotal:10000000000});
+  response = await clientAcc.run("createNewPair", {
+    root0:rootA,
+    root1:rootB,
+    pairSoArg:pair.pairSoArg,
+    connectorSoArg0:pair.connectorSoArg0,
+    connectorSoArg1:pair.connectorSoArg1,
+    rootSoArg:pair.rootSoArg,
+    rootName:pair.rootName,
+    rootSymbol:pair.rootSymbol,
+    rootDecimals:pair.rootDecimals,
+    grammsForPair:1500000000,
+    grammsForRoot:1600000000,
+    grammsForConnector:1100000000,
+    grammsForWallet:3200000000,
+    grammsTotal:15000000000,
+  });
   console.log("Contract reacted to your createNewPair:", response.decoded.output);
 
   // // Call `rootDEX` function

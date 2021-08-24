@@ -1,4 +1,4 @@
-pragma ton-solidity ^0.45.0;
+pragma ton-solidity >= 0.45.0;
 pragma AbiHeader expire;
 pragma AbiHeader time;
 pragma AbiHeader pubkey;
@@ -7,6 +7,7 @@ import "./DEXClient.sol";
 import "./DEXPair.sol";
 import "./RootTokenContract.sol";
 import "./interfaces/IDEXRoot.sol";
+import "./interfaces/IRootTokenContract.sol";
 
 contract DEXroot is IDEXRoot {
 
@@ -30,26 +31,33 @@ contract DEXroot is IDEXRoot {
 	mapping(address => Pair) public pairs;
 	address[] public pairKeys;
 
+	mapping(address => address) public creatorForPair;
+
+	// Data structure
+	struct Data {
+		address pair;
+		address root0;
+		address root1;
+	}
+
+	mapping(address => Data) public dataForRootAB;
+
 	mapping(uint256 => address) public pubkeys;
 	mapping(address => uint256) public clients;
 	address[] public clientKeys;
 
 	mapping(address => uint128) public balanceOf;
-	mapping(address => uint256) public hashOf;
+	mapping(address => string) public msgOf;
 
 	// Grams constants
 	uint128 constant public GRAMS_CREATE_DEX_CLIENT = 1 ton;
+	uint128 constant public MIN_BALANCE = 1 ton;
+	uint128 constant public GRAMS_FOR_CALLBACK = 0.5 ton;
 
 	// Modifier that allows public function to accept external calls only from the contract owner.
 	modifier checkOwnerAndAccept {
 		require(msg.pubkey() == tvm.pubkey(), 101);
 		tvm.accept();
-		_;
-	}
-
-	// Modifier that allows only signed external public calls.
-	modifier checkNotEmptyPubkey {
-		require(msg.pubkey() != 0, 103);
 		_;
 	}
 
@@ -66,12 +74,13 @@ contract DEXroot is IDEXRoot {
 
 	// Function to receive plain transfers.
 	receive() external {
-		require (!(msg.value < GRAMS_CREATE_DEX_CLIENT), 107)
+		require (msg.value >= GRAMS_CREATE_DEX_CLIENT, 107);
 		balanceOf[msg.sender] += msg.value;
 		TvmSlice slice = msg.data;
 		if (!slice.empty()) {
 			(uint32 functionId, string message) = slice.decode(uint32, string);
-			hashOf[msg.sender] = sha256(message);
+			functionId;
+			msgOf[msg.sender] = message;
 		}
 	}
 
@@ -109,36 +118,32 @@ contract DEXroot is IDEXRoot {
 		return { value: 0, bounce: false, flag: 64 } computeClientAddress(clientPubKey,clientSoArg);
 	}
 
-	function hashOfPubKey(uint256 pubKey) private inline pure returns (uint256) {
-		string stringFromPubKey = format("{:x}", pubKey);
-		return sha256(stringFromPubKey);
-	}
-
-	function createDEXclient(address giver, uint256 souint) public checkNotEmptyPubkey returns (address deployedAddress, bool statusCreate){
-		require (!pubkeys.exists(msg.pubkey()) && hashOf.exists(giver) && !(balanceOf[giver] < GRAMS_CREATE_DEX_CLIENT) && hashOf[giver] == hashOfPubKey(msg.pubkey()), 106);
-		tvm.accept();
-		uint256 pubkey = msg.pubkey();
-		statusCreate = false;
-		deployedAddress = address(0);
-		uint128 prepay = balanceOf[giver];
+	function createDEXclient(uint256 pubkey, uint256 souint) public view internalMsg {
+		tvm.rawReserve(address(this).balance - msg.value, 2);
+		require (address(this).balance >= MIN_BALANCE, 108);
+		require (pubkey != 0 && !pubkeys.exists(pubkey), 106);
+		require (msg.value >= GRAMS_CREATE_DEX_CLIENT, 109);
 		TvmCell stateInit = tvm.buildStateInit({
 			contr: DEXClient,
 			varInit: {rootDEX:address(this), soUINT:souint, codeDEXConnector:codeDEXconnector},
 			code: codeDEXclient,
 			pubkey: pubkey
 		});
-		deployedAddress = new DEXClient{
+		address deployedAddress = new DEXClient{
 			stateInit: stateInit,
-			flag: 0,
+			flag: 128,
 			bounce : false,
-			value : (prepay - 3100000)
-		}();
+			value : 0
+		}(msg.sender);
+	}
+
+	function createDEXclientCallback(uint256 pubkey, address deployedAddress, address owner) public override internalMsg {
+		tvm.rawReserve(address(this).balance - msg.value, 2);
 		pubkeys[pubkey] = deployedAddress;
 		clients[deployedAddress] = pubkey;
 		clientKeys.push(deployedAddress);
-		statusCreate = true;
-		delete balanceOf[giver];
-		delete hashOf[giver];
+		address returnTo = owner != address(0) ? owner : msg.sender;
+    returnTo.transfer({value: 0, bounce: true, flag: 128});
 	}
 
 	function computePairAddress(
@@ -238,11 +243,12 @@ contract DEXroot is IDEXRoot {
 		uint128 grammsForConnector,
 		uint128 grammsForWallet
 	) public override {
+		require(address(this).balance >= MIN_BALANCE, 108);
 		require(root0 != address(0) && root1 != address(0) ,104);
-		require(!(grammsForPair < 500000000) && !(grammsForRoot < 500000000) && !(grammsForConnector < 500000000) && !(grammsForWallet < 500000000),105);
+		require(grammsForPair >= 1 ton && grammsForRoot >= 1 ton && grammsForConnector >= 1 ton && grammsForWallet >= 1 ton, 105);
 		tvm.rawReserve(address(this).balance - msg.value, 2);
-		uint128 grammsNeeded = grammsForPair + (2 * grammsForConnector) + (2 * grammsForWallet) + grammsForRoot;
-		if (clients.exists(msg.sender) && !(msg.value < grammsNeeded) && !(root0 == root1) && !roots[root0].exists(root1) && !roots[root1].exists(root0)) {
+		uint128 grammsNeeded = grammsForPair + (2 * grammsForConnector) + (2 * grammsForWallet) + grammsForRoot + GRAMS_FOR_CALLBACK;
+		if (clients.exists(msg.sender) && msg.value >= grammsNeeded && root0 != root1 && !roots[root0].exists(root1) && !roots[root1].exists(root0)) {
 			TvmCell stateInitR = tvm.buildStateInit({
 				contr: RootTokenContract,
 				varInit: {
@@ -268,31 +274,73 @@ contract DEXroot is IDEXRoot {
 					rootAB:root01
 				},
 				code: codeDEXpair,
-				pubkey : clients[msg.sender]
+				pubkey: clients[msg.sender]
 			});
+
 			address pairAddress = new DEXPair{
 				stateInit: stateInitP,
 				flag: 0,
 				bounce : false,
-				value : grammsForPair + (2 * grammsForConnector) + (2 * grammsForWallet)
+				value : grammsForPair + (2 * grammsForConnector) + (2 * grammsForWallet) + GRAMS_FOR_CALLBACK
 			}(connectorSoArg0, connectorSoArg1, grammsForConnector, grammsForWallet);
+
 			address rootAddress = new RootTokenContract{
 				stateInit: stateInitR,
 				flag: 0,
 				bounce : false,
 				value : grammsForRoot
 			}(0, pairAddress);
-			roots[root0][root1] = pairAddress;
-			roots[root1][root0] = pairAddress;
-			Pair cp = pairs[pairAddress];
-			cp.root0 = root0;
-			cp.root1 = root1;
-			cp.rootLP = rootAddress;
-			pairs[pairAddress] = cp;
-			pairKeys.push(pairAddress);
+
+			creatorForPair[pairAddress] = msg.sender;
 			msg.sender.transfer({ value: 0, flag: 128});
 		} else {
 			msg.sender.transfer({ value: 0, flag: 128});
+		}
+	}
+
+	function createDEXpairCallback(address root0, address root1, address root01) public override internalMsg {
+		require (creatorForPair.exists(msg.sender), 110);
+		tvm.rawReserve(address(this).balance - msg.value, 2);
+		address pairAddress = msg.sender;
+		address creator = creatorForPair[pairAddress];
+		if (root0 != address(0) && root1 != address(0) && root01 != address(0)) {
+			Data cd = dataForRootAB[root01];
+			cd.pair = pairAddress;
+			cd.root0 = root0;
+			cd.root1 = root1;
+			dataForRootAB[root01] = cd;
+			RootTokenContract(root01).getDetails{value: 0, flag: 128, callback: DEXroot.getDetailsCallback}();
+		} else {
+      delete creatorForPair[pairAddress];
+			creator.transfer({ value: 0, flag: 128});
+		}
+	}
+
+
+	// A callback function for getDetails() from RootTokenContract.
+	function getDetailsCallback(IRootTokenContract.IRootTokenContractDetails value0) external {
+		require (dataForRootAB.exists(msg.sender), 111);
+		tvm.rawReserve(address(this).balance - msg.value, 2);
+		address rootAddress = msg.sender;
+		Data cd = dataForRootAB[rootAddress];
+		address pairAddress = cd.pair;
+		address creator = creatorForPair[pairAddress];
+		if (value0.root_public_key == 0 && value0.root_owner_address == pairAddress) {
+			roots[cd.root0][cd.root1] = pairAddress;
+			roots[cd.root1][cd.root0] = pairAddress;
+			pairKeys.push(pairAddress);
+			Pair cp = pairs[pairAddress];
+			cp.root0 = cd.root0;
+			cp.root1 = cd.root1;
+			cp.rootLP = rootAddress;
+			pairs[pairAddress] = cp;
+			delete creatorForPair[pairAddress];
+			delete dataForRootAB[rootAddress];
+			creator.transfer({ value: 0, flag: 128});
+		} else {
+			delete creatorForPair[pairAddress];
+			delete dataForRootAB[rootAddress];
+			creator.transfer({ value: 0, flag: 128});
 		}
 	}
 

@@ -6,7 +6,6 @@ const { DEXClientContract } = require("./DEXClient.js");
 const { DEXConnectorContract } = require("./DEXConnector.js");
 const { RootTokenContract } = require("./RootTokenContract.js");
 const { GiverContract } = require("./Giver.js");
-const { GiverContractNTD } = require("./GiverContract.js");
 
 const dotenv = require('dotenv').config();
 const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
@@ -46,9 +45,9 @@ async function main(client) {
     } else if (networkSelector == 1) {
       const giverNTDAddress = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).address;;
       const giverNTDKeys = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).keys;
-      const giverNTDAcc = new Account(GiverContractNTD, {address: giverNTDAddress,signer: giverNTDKeys,client,});
-      response = await giverNTDAcc.run("sendTransaction", {dest:clientAddr,value:150000000000,bounce:false});
-      console.log("Giver send 150 ton to clientAddr:", response.decoded.output);
+      const giverNTDAcc = new Account(GiverContract, {address: giverNTDAddress,signer: giverNTDKeys,client,});
+      response = await giverNTDAcc.run("sendTransaction", {dest:clientAddr,value:10000000000,bounce:true});
+      console.log("Giver send 10 ton to clientAddr:", response.decoded.output);
 
     } else if (networkSelector == 2){
       console.log('Pls set giver for main.ton.dev');

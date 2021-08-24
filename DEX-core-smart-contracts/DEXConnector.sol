@@ -1,4 +1,4 @@
-pragma ton-solidity ^0.45.0;
+pragma ton-solidity >= 0.45.0;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 pragma AbiHeader time;
@@ -16,8 +16,8 @@ contract DEXConnector is IExpectedWalletAddressCallback, IDEXConnector {
   address static public dexclient;
 
   // Grams constants
-  uint128 constant GRAMS_TO_ROOT = 0.5 ton;
-  uint128 constant GRAMS_TO_NEW_WALLET = 0.25 ton;
+  uint128 constant GRAMS_TO_ROOT = 1.5 ton;
+  uint128 constant GRAMS_TO_NEW_WALLET = 0.75 ton;
 
   address public drivenRoot;
   address public driven;
@@ -59,7 +59,7 @@ contract DEXConnector is IExpectedWalletAddressCallback, IDEXConnector {
   // Function to deployEmptyWallet
   function deployEmptyWallet(address root) public override {
     require(msg.sender == dexclient, 101);
-    require(!(msg.value < GRAMS_TO_ROOT * 2), 103);
+    require(msg.value >= GRAMS_TO_ROOT * 2, 103);
     tvm.rawReserve(address(this).balance - msg.value, 2);
     if (!statusConnected) {
       drivenRoot = root;

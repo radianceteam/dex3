@@ -4,7 +4,6 @@ const { Account } = require("@tonclient/appkit");
 const { DEXRootContract } = require("./DEXRoot.js");
 const { DEXRootCode } = require("./DEXRootCode.js");
 const { GiverContract } = require("./Giver.js");
-const { GiverContractNTD } = require("./GiverContract.js");
 const fs = require('fs');
 const pathJson = './DEXRootContract.json';
 const dotenv = require('dotenv').config();
@@ -22,9 +21,9 @@ async function logEvents(params, response_type) {
 
 async function main(client) {
   let response;
-  const contractKeys = JSON.parse(fs.readFileSync(pathJson,{encoding: "utf8"})).keys;
+  // const contractKeys = JSON.parse(fs.readFileSync(pathJson,{encoding: "utf8"})).keys;
 
-  // const contractKeys = signerKeys(await TonClient.default.crypto.generate_random_sign_keys());
+  const contractKeys = signerKeys(await TonClient.default.crypto.generate_random_sign_keys());
   const rootAcc = new Account(DEXRootContract, {
     signer: contractKeys,
     client,
@@ -104,6 +103,7 @@ console.log("Contract reacted to your setRootTokenCode:", response.decoded.outpu
 // Call `setTONTokenWalletCode` function
 response = await rootAcc.run("setTONTokenWalletCode", {code:DEXRootCode.wallet});
 console.log("Contract reacted to your setTONTokenWalletCode:", response.decoded.output);
+
 
 
 

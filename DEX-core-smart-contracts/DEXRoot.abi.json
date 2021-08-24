@@ -60,14 +60,6 @@
 			]
 		},
 		{
-			"name": "setCreator",
-			"inputs": [
-				{"name":"giverAddr","type":"address"}
-			],
-			"outputs": [
-			]
-		},
-		{
 			"name": "getClientAddress",
 			"inputs": [
 				{"name":"_answer_id","type":"uint32"},
@@ -85,8 +77,16 @@
 				{"name":"souint","type":"uint256"}
 			],
 			"outputs": [
+			]
+		},
+		{
+			"name": "createDEXclientCallback",
+			"inputs": [
+				{"name":"pubkey","type":"uint256"},
 				{"name":"deployedAddress","type":"address"},
-				{"name":"statusCreate","type":"bool"}
+				{"name":"owner","type":"address"}
+			],
+			"outputs": [
 			]
 		},
 		{
@@ -146,6 +146,24 @@
 				{"name":"grammsForRoot","type":"uint128"},
 				{"name":"grammsForConnector","type":"uint128"},
 				{"name":"grammsForWallet","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "createDEXpairCallback",
+			"inputs": [
+				{"name":"root0","type":"address"},
+				{"name":"root1","type":"address"},
+				{"name":"root01","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getDetailsCallback",
+			"inputs": [
+				{"components":[{"name":"name","type":"bytes"},{"name":"symbol","type":"bytes"},{"name":"decimals","type":"uint8"},{"name":"root_public_key","type":"uint256"},{"name":"root_owner_address","type":"address"},{"name":"total_supply","type":"uint128"}],"name":"value0","type":"tuple"}
 			],
 			"outputs": [
 			]
@@ -263,6 +281,22 @@
 			]
 		},
 		{
+			"name": "creatorForPair",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"creatorForPair","type":"map(address,address)"}
+			]
+		},
+		{
+			"name": "dataForRootAB",
+			"inputs": [
+			],
+			"outputs": [
+				{"components":[{"name":"pair","type":"address"},{"name":"root0","type":"address"},{"name":"root1","type":"address"}],"name":"dataForRootAB","type":"map(address,tuple)"}
+			]
+		},
+		{
 			"name": "pubkeys",
 			"inputs": [
 			],
@@ -295,11 +329,11 @@
 			]
 		},
 		{
-			"name": "creators",
+			"name": "msgOf",
 			"inputs": [
 			],
 			"outputs": [
-				{"name":"creators","type":"map(uint256,address)"}
+				{"name":"msgOf","type":"map(address,bytes)"}
 			]
 		}
 	],

@@ -2,11 +2,10 @@ const {TonClient, abiContract, signerKeys} = require("@tonclient/core");
 const { libNode } = require("@tonclient/lib-node");
 const { Account } = require("@tonclient/appkit");
 const dotenv = require('dotenv').config();
-const { RootTokenContract } = require("./RootTokenContract.js");
+const { RootTokenContractContract } = require("./RootTokenContract.js");
 const { TONTokenWalletContract } = require("./TONTokenWallet.js");
 const { DEXRootCode } = require("./DEXRootCode.js");
 const { GiverContract } = require("./Giver.js");
-const { GiverContractNTD } = require("./GiverContract.js");
 const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
 const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
 const networkSelector = process.env.NET_SELECTOR;
@@ -38,13 +37,13 @@ async function logEvents(params, response_type) {
 async function main(client) {
   const rootAbi = {
     type: 'Contract',
-    value: RootTokenContract.abi
+    value: RootTokenContractContract.abi
   }
 
-  const rootKeys = JSON.parse(fs.readFileSync(pathJsonR,{encoding: "utf8"})).keys;
+  // const rootKeys = JSON.parse(fs.readFileSync(pathJsonR,{encoding: "utf8"})).keys;
 
-  // const rootKeys = signerKeys(await TonClient.default.crypto.generate_random_sign_keys());
-  const rootAcc = new Account(RootTokenContract, {
+  const rootKeys = signerKeys(await TonClient.default.crypto.generate_random_sign_keys());
+  const rootAcc = new Account(RootTokenContractContract, {
     signer: rootKeys,
     initData: {
       _randomNonce: 0,
@@ -133,8 +132,8 @@ response = await rootAcc.runLocal("symbol", {});
 console.log("Contract reacted to your symbol:", hex2ascii(response.decoded.output.symbol));
 
 // Execute `total_supply` get method  (execute the message locally on TVM)
-response = await rootAcc.runLocal("total_supply", {});
-console.log("Contract reacted to your total_supply:", response.decoded.output);
+response = await rootAcc.runLocal("getDetails", {_answer_id:0});
+console.log("Contract reacted to your getDetails:", response.decoded.output);
 
 }
 

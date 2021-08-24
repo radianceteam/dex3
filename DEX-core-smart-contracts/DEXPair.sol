@@ -1,4 +1,4 @@
-pragma ton-solidity ^0.45.0;
+pragma ton-solidity >= 0.45.0;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 pragma AbiHeader time;
@@ -12,6 +12,7 @@ import "./interfaces/IDEXConnector.sol";
 import "./interfaces/IDEXConnect.sol";
 import "./interfaces/IDEXClient.sol";
 import "./interfaces/IDEXPair.sol";
+import "./interfaces/IDEXRoot.sol";
 
 contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensCallback  {
 
@@ -66,6 +67,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
   uint128 constant GRAMS_SEND_UNUSED_RETURN = 0.1 ton;
   uint128 constant GRAMS_MINT = 0.05 ton;
   uint128 constant GRAMS_RETURN = 0.2 ton;
+  uint128 constant GRAMS_CALLBACK = 0.5 ton;
+
 
   // Modifier that allows public function to accept any external calls.
   modifier alwaysAccept {
@@ -89,6 +92,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     counterCallback = 0;
     connectRoot(rootA, souintA, gramsDeployConnector, gramsDeployWallet);
     connectRoot(rootB, souintB, gramsDeployConnector, gramsDeployWallet);
+    TvmCell body = tvm.encodeBody(IDEXRoot(rootDEX).createDEXpairCallback, rootA, rootB, rootAB);
+    rootDEX.transfer({value:GRAMS_CALLBACK, bounce:true, body:body});
   }
 
   // Function to compute DEX Connector address for connect to TON Token Wallet of Root Token Contract.
@@ -153,9 +158,9 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
 
   // Function to get amountOut for swap from amountIn .
   function getAmountOut(uint128 amountIn, address rootIn, address rootOut) private inline view returns (uint128){
-    uint128 amountInWithFee = math.muldiv(amountIn,997,1);
-    uint128 numerator = math.muldiv(amountInWithFee,balanceReserve[rootOut],1);
-    uint128 denominator = amountInWithFee + math.muldiv(balanceReserve[rootIn],1000,1);
+    uint128 amountInWithFee = amountIn * 997;
+    uint128 numerator = amountInWithFee * balanceReserve[rootOut];
+    uint128 denominator = amountInWithFee + (balanceReserve[rootIn] * 1000);
     return math.muldiv(1,numerator,denominator);
   }
 
@@ -231,9 +236,9 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
 
   // Function for get first callback id.
   function getFirstCallback() private view returns (uint) {
-		optional(uint, Callback) rc = callbacks.min();
-		if (rc.hasValue()) {(uint number, ) = rc.get();return number;} else {return 0;}
-	}
+    optional(uint, Callback) rc = callbacks.min();
+    if (rc.hasValue()) {(uint number, ) = rc.get();return number;} else {return 0;}
+  }
 
   // Function to callback from TON Token Wallet of Root Token Contract to DEX Pair.
   function tokensReceivedCallback(
@@ -282,7 +287,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
             TvmBuilder builder;
             builder.store(uint8(8), address(0), address(0));
             TvmCell new_payload = builder.toCell();
-            TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[token_root]).transfer, token_wallet, amount, new_payload);
+            TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[token_root]).transfer, sender_wallet, amount, new_payload);
             rootConnector[token_root].transfer({value: 0, bounce:true, flag: 128, body:body});
           }
         }
@@ -471,99 +476,132 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
             arg1.transfer({ value: 0, flag: 128});
           }
         }
-
       }
     }
   }
 
-function burnCallback(
-  uint128 tokens,
-  TvmCell payload,
-  uint256 sender_public_key,
-  address sender_address,
-  address wallet_address,
-  address send_gas_to
-) public override alwaysAccept {
-  if (msg.sender == rootAB) {
-    tvm.rawReserve(address(this).balance - msg.value, 2);
-    TvmSlice slice = payload.toSlice();
-    (uint8 arg0, address arg1, address arg2) = slice.decode(uint8, address, address);
-    counterCallback++;
-    Callback cc = callbacks[counterCallback];
-    cc.token_wallet = wallet_address;
-    cc.token_root = msg.sender;
-    cc.amount = tokens;
-    cc.sender_public_key = sender_public_key;
-    cc.sender_address = sender_address;
-    cc.sender_wallet = wallet_address;
-    cc.original_gas_to = address(0);
-    cc.updated_balance = 0;
-    cc.payload_arg0 = arg0;
-    cc.payload_arg1 = arg1;
-    cc.payload_arg2 = arg2;
-    callbacks[counterCallback] = cc;
-    if (arg0 == 3 && arg1 != address(0) && arg2 != address(0)) {
-      uint128 returnA = math.muldiv(balanceReserve[rootA],tokens,totalSupply);
-      uint128 returnB = math.muldiv(balanceReserve[rootB],tokens,totalSupply);
-      if (!(returnA > balanceReserve[rootA]) && !(returnB > balanceReserve[rootB])) {
-        totalSupply -= tokens;
-        balanceReserve[rootA] -= returnA;
-        balanceReserve[rootB] -= returnB;
-        TvmBuilder builder;
-        builder.store(uint8(6), address(0), address(0));
-        TvmCell new_payload = builder.toCell();
-        TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, arg1, returnA, new_payload);
-        TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, arg2, returnB, new_payload);
-        rootConnector[rootA].transfer({value: GRAMS_RETURN, bounce:true, body:bodyA});
-        rootConnector[rootB].transfer({value: GRAMS_RETURN, bounce:true, body:bodyB});
-        if (counterCallback > 10){delete callbacks[getFirstCallback()];}
-        send_gas_to.transfer({value: 0, bounce:true, flag: 128});
+  function burnCallback(
+    uint128 tokens,
+    TvmCell payload,
+    uint256 sender_public_key,
+    address sender_address,
+    address wallet_address,
+    address send_gas_to
+  ) public override alwaysAccept {
+    if (msg.sender == rootAB) {
+      tvm.rawReserve(address(this).balance - msg.value, 2);
+      TvmSlice slice = payload.toSlice();
+      (uint8 arg0, address arg1, address arg2) = slice.decode(uint8, address, address);
+      if (counterCallback > 10) {
+        Callback cc = callbacks[counterCallback];
+        cc.token_wallet = wallet_address;
+        cc.token_root = msg.sender;
+        cc.amount = tokens;
+        cc.sender_public_key = sender_public_key;
+        cc.sender_address = sender_address;
+        cc.sender_wallet = wallet_address;
+        cc.original_gas_to = address(0);
+        cc.updated_balance = 0;
+        cc.payload_arg0 = arg0;
+        cc.payload_arg1 = arg1;
+        cc.payload_arg2 = arg2;
+        callbacks[counterCallback] = cc;
+        counterCallback++;
+        delete callbacks[getFirstCallback()];
+        if (arg0 == 3 && arg1 != address(0) && arg2 != address(0)) {
+          uint128 returnA = math.muldiv(balanceReserve[rootA],tokens,totalSupply);
+          uint128 returnB = math.muldiv(balanceReserve[rootB],tokens,totalSupply);
+          if (!(returnA > balanceReserve[rootA]) && !(returnB > balanceReserve[rootB])) {
+            totalSupply -= tokens;
+            balanceReserve[rootA] -= returnA;
+            balanceReserve[rootB] -= returnB;
+            TvmBuilder builder;
+            builder.store(uint8(6), address(0), address(0));
+            TvmCell new_payload = builder.toCell();
+            TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, arg1, returnA, new_payload);
+            TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, arg2, returnB, new_payload);
+            rootConnector[rootA].transfer({value: GRAMS_RETURN, bounce:true, body:bodyA});
+            rootConnector[rootB].transfer({value: GRAMS_RETURN, bounce:true, body:bodyB});
+            if (counterCallback > 10){delete callbacks[getFirstCallback()];}
+            send_gas_to.transfer({value: 0, bounce:true, flag: 128});
+          }
+        }
+      } else {
+        Callback cc = callbacks[counterCallback];
+        cc.token_wallet = wallet_address;
+        cc.token_root = msg.sender;
+        cc.amount = tokens;
+        cc.sender_public_key = sender_public_key;
+        cc.sender_address = sender_address;
+        cc.sender_wallet = wallet_address;
+        cc.original_gas_to = address(0);
+        cc.updated_balance = 0;
+        cc.payload_arg0 = arg0;
+        cc.payload_arg1 = arg1;
+        cc.payload_arg2 = arg2;
+        callbacks[counterCallback] = cc;
+        counterCallback++;
+        if (arg0 == 3 && arg1 != address(0) && arg2 != address(0)) {
+          uint128 returnA = math.muldiv(balanceReserve[rootA],tokens,totalSupply);
+          uint128 returnB = math.muldiv(balanceReserve[rootB],tokens,totalSupply);
+          if (!(returnA > balanceReserve[rootA]) && !(returnB > balanceReserve[rootB])) {
+            totalSupply -= tokens;
+            balanceReserve[rootA] -= returnA;
+            balanceReserve[rootB] -= returnB;
+            TvmBuilder builder;
+            builder.store(uint8(6), address(0), address(0));
+            TvmCell new_payload = builder.toCell();
+            TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, arg1, returnA, new_payload);
+            TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, arg2, returnB, new_payload);
+            rootConnector[rootA].transfer({value: GRAMS_RETURN, bounce:true, body:bodyA});
+            rootConnector[rootB].transfer({value: GRAMS_RETURN, bounce:true, body:bodyB});
+            if (counterCallback > 10){delete callbacks[getFirstCallback()];}
+            send_gas_to.transfer({value: 0, bounce:true, flag: 128});
+          }
+        }
       }
-      if (counterCallback > 10){delete callbacks[getFirstCallback()];}
     }
-    if (counterCallback > 10){delete callbacks[getFirstCallback()];}
   }
-}
 
-function getCallback(uint id) public view checkPubKeyAndAccept returns (
-  address token_wallet,
-  address token_root,
-  uint128 amount,
-  uint256 sender_public_key,
-  address sender_address,
-  address sender_wallet,
-  address original_gas_to,
-  uint128 updated_balance,
-  uint8 payload_arg0,
-  address payload_arg1,
-  address payload_arg2
-){
-  Callback cc = callbacks[id];
-  token_wallet = cc.token_wallet;
-  token_root = cc.token_root;
-  amount = cc.amount;
-  sender_public_key = cc.sender_public_key;
-  sender_address = cc.sender_address;
-  sender_wallet = cc.sender_wallet;
-  original_gas_to = cc.original_gas_to;
-  updated_balance = cc.updated_balance;
-  payload_arg0 = cc.payload_arg0;
-  payload_arg1 = cc.payload_arg1;
-  payload_arg2 = cc.payload_arg2;
-}
+  function getCallback(uint id) public view checkPubKeyAndAccept returns (
+    address token_wallet,
+    address token_root,
+    uint128 amount,
+    uint256 sender_public_key,
+    address sender_address,
+    address sender_wallet,
+    address original_gas_to,
+    uint128 updated_balance,
+    uint8 payload_arg0,
+    address payload_arg1,
+    address payload_arg2
+  ){
+    Callback cc = callbacks[id];
+    token_wallet = cc.token_wallet;
+    token_root = cc.token_root;
+    amount = cc.amount;
+    sender_public_key = cc.sender_public_key;
+    sender_address = cc.sender_address;
+    sender_wallet = cc.sender_wallet;
+    original_gas_to = cc.original_gas_to;
+    updated_balance = cc.updated_balance;
+    payload_arg0 = cc.payload_arg0;
+    payload_arg1 = cc.payload_arg1;
+    payload_arg2 = cc.payload_arg2;
+  }
 
-// Function for get this TON gramms balance
-function thisBalance() private inline  pure returns (uint128) {
-  return address(this).balance;
-}
+  // Function for get this TON gramms balance
+  function thisBalance() private inline  pure returns (uint128) {
+    return address(this).balance;
+  }
 
-// Function for external get this contract TON gramms balance
-function getBalance() public pure responsible returns (uint128) {
-  return { value: 0, bounce: false, flag: 64 } thisBalance();
-}
+  // Function for external get this contract TON gramms balance
+  function getBalance() public pure responsible returns (uint128) {
+    return { value: 0, bounce: false, flag: 64 } thisBalance();
+  }
 
-// Function to receive plain transfers.
-receive() external {
-}
+  // Function to receive plain transfers.
+  receive() external {
+  }
 
 }

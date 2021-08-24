@@ -1,4 +1,4 @@
-pragma ton-solidity ^0.45.0;
+pragma ton-solidity >= 0.45.0;
 pragma AbiHeader expire;
 pragma AbiHeader pubkey;
 pragma AbiHeader time;
@@ -19,4 +19,6 @@ interface IDEXRoot {
 		uint128 grammsForConnector,
 		uint128 grammsForWallet
 	) external;
+	function createDEXclientCallback(uint256 pubkey, address deployedAddress, address returnTo) external internalMsg;
+  function createDEXpairCallback(address root0, address root1, address root01) external internalMsg;
 }

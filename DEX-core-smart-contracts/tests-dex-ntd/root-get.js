@@ -3,7 +3,6 @@ const { libNode } = require("@tonclient/lib-node");
 const { Account } = require("@tonclient/appkit");
 const { DEXRootContract } = require("./DEXRoot.js");
 const { DEXRootCode } = require("./DEXRootCode.js");
-const { GiverContract } = require("./GiverContract.js");
 const fs = require('fs');
 const pathJsonRoot = './DEXRootContract.json';
 const dotenv = require('dotenv').config();
@@ -19,7 +18,7 @@ async function logEvents(params, response_type) {
   // console.log(`response_type = ${JSON.stringify(response_type, null, 2)}`);
 }
 
-let extraton = '5173301c33c5ea212613b84626d9780e2556c5a2476433aafa89acb677a48fac';
+let extraton = '3b1e93758fd8ef08906f53014d2066229255b6b789052261e4427dec6ad2ed78';
 
 async function main(client) {
   let response;
@@ -34,12 +33,25 @@ async function main(client) {
   let pubkey = '0x'+extraton;
 
 // Call `creators` function
-response = await rootAcc.runLocal("creators", {});
-console.log("Contract reacted to your creators:", response.decoded.output);
+// response = await rootAcc.runLocal("creators", {});
+// console.log("Contract reacted to your creators:", response.decoded.output);
 
-// Call `balanceOf` function
-response = await rootAcc.runLocal("balanceOf", {});
-console.log("Contract reacted to your balanceOf:", response.decoded.output);
+// // Call `balanceOf` function
+// response = await rootAcc.runLocal("balanceOf", {});
+// console.log("Contract reacted to your balanceOf:", response.decoded.output);
+//
+// // Call `balanceOf` function
+// response = await rootAcc.runLocal("hashOf", {});
+// console.log("Contract reacted to your hashOf:", response.decoded.output);
+
+
+// Call `pairs` function
+response = await rootAcc.runLocal("creatorForPair", {});
+console.log("Contract reacted to your creatorForPair:", response.decoded.output);
+
+// Call `pairs` function
+response = await rootAcc.runLocal("dataForRootAB", {});
+console.log("Contract reacted to your dataForRootAB:", response.decoded.output);
 
 
 // Call `pairs` function
@@ -62,7 +74,18 @@ console.log("Contract reacted to your clients:", response.decoded.output);
 response = await rootAcc.runLocal("clientKeys", {});
 console.log("Contract reacted to your clientKeys:", response.decoded.output);
 
-
+// // Call `clientKeys` function
+// response = await rootAcc.runLocal("createCallMsgSender", {});
+// console.log("Contract reacted to your createCallMsgSender:", response.decoded.output);
+// // Call `clientKeys` function
+// response = await rootAcc.runLocal("createCallMsgPubkey", {});
+// console.log("Contract reacted to your createCallMsgPubkey:", response.decoded.output);
+// // Call `clientKeys` function
+// response = await rootAcc.runLocal("createCallMsgValue", {});
+// console.log("Contract reacted to your createCallMsgValue:", response.decoded.output);
+// // Call `clientKeys` function
+// response = await rootAcc.runLocal("createCallSouint", {});
+// console.log("Contract reacted to your createCallSouint:", response.decoded.output);
 
 
 

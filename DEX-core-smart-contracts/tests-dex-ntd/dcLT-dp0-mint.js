@@ -2,7 +2,7 @@ const {TonClient, abiContract, signerKeys} = require("@tonclient/core");
 const { libNode } = require("@tonclient/lib-node");
 const { Account } = require("@tonclient/appkit");
 const { DEXClientContract } = require("./DEXClient.js");
-const { RootTokenContract } = require("./RootTokenContract.js");
+const { RootTokenContractContract } = require("./RootTokenContract.js");
 const { TONTokenWalletContract } = require("./TONTokenWallet.js");
 const dotenv = require('dotenv').config();
 const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
@@ -45,20 +45,38 @@ async function main(client) {
   console.log(usdprovide,' nano USDT');
   const rootKeysA = JSON.parse(fs.readFileSync(currentRootA,{encoding: "utf8"})).keys;
   const rootAddrA = JSON.parse(fs.readFileSync(currentRootA,{encoding: "utf8"})).address;
-  const rootAccA = new Account(RootTokenContract, {address: rootAddrA,signer:rootKeysA,client,});
+  const rootAccA = new Account(RootTokenContractContract, {address: rootAddrA,signer:rootKeysA,client,});
   console.log("rootAddrA:", rootAddrA);
+  console.log("rootKeysA:", rootKeysA);
   const rootKeysB = JSON.parse(fs.readFileSync(currentRootB,{encoding: "utf8"})).keys;
   const rootAddrB = JSON.parse(fs.readFileSync(currentRootB,{encoding: "utf8"})).address;
-  const rootAccB = new Account(RootTokenContract, {address: rootAddrB,signer:rootKeysB,client,});
+  const rootAccB = new Account(RootTokenContractContract, {address: rootAddrB,signer:rootKeysB,client,});
   console.log("rootAddrB:", rootAddrB);
+  console.log("rootKeysB:", rootKeysB);
 
 
+  // for (const item of resultArr) {
+    // const clientKeys = item.keys;
+    const clientKeys = resultArr[0].keys;
+    console.log("clientKeys:", clientKeys);
 
-  for (const item of resultArr) {
-    const clientKeys = item.keys;
-    const clientAddr = item.address;
+    // const clientAddr = item.address;
+    const clientAddr = resultArr[0].address;
+    console.log("clientAddr:", clientAddr);
+
     const clientAcc = new Account(DEXClientContract, {address:clientAddr,signer:clientKeys,client,});
     response = await clientAcc.runLocal("rootWallet", {});
+    console.log("rootWallet:", response.decoded.output);
+
+    // response = await clientAcc.runLocal("rootConnector", {});
+    // console.log("rootConnector:", response.decoded.output);
+    //
+    // response = await clientAcc.runLocal("pairs", {});
+    // console.log("pairs:", response.decoded.output);
+
+
+
+
     let walletRootA = response.decoded.output.rootWallet[rootAddrA];
     const walletAccA = new Account(TONTokenWalletContract, {address: walletRootA,client,});
     let walletRootB = response.decoded.output.rootWallet[rootAddrB];
@@ -72,7 +90,7 @@ async function main(client) {
     response = await rootAccB.run("mint", {tokens:usdprovide, to:walletRootB});
     console.log(`Contract rootAccB run mint with tx ${response.decoded.output}, ${response.transaction.id}`);
 
-  }
+  // }
 
 }
 

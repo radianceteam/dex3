@@ -1,1 +1,16 @@
 tondev sol compile DEXClient.sol && tondev sol compile DEXConnector.sol && tondev sol compile DEXPair.sol && tondev sol compile DEXRoot.sol && tondev sol compile RootTokenContract.sol && tondev sol compile TONTokenWallet.sol
+tondev js wrap DEXClient.abi.json -o DEXClient.js && tondev js wrap DEXConnector.abi.json -o DEXConnector.js && tondev js wrap DEXPair.abi.json -o DEXPair.js && tondev js wrap DEXRoot.abi.json -o DEXRoot.js && tondev js wrap RootTokenContract.abi.json -o RootTokenContract.js && tondev js wrap TONTokenWallet.abi.json -o TONTokenWallet.js
+/home/yaroslav/.tondev/solidity/tvm_linker decode --tvc DEXClient.tvc | grep code: | cut -c 8- > DEXClient.txt &&
+/home/yaroslav/.tondev/solidity/tvm_linker decode --tvc DEXConnector.tvc | grep code: | cut -c 8- > DEXConnector.txt &&
+/home/yaroslav/.tondev/solidity/tvm_linker decode --tvc DEXPair.tvc | grep code: | cut -c 8- > DEXPair.txt &&
+/home/yaroslav/.tondev/solidity/tvm_linker decode --tvc DEXRoot.tvc | grep code: | cut -c 8- > DEXRoot.txt &&
+/home/yaroslav/.tondev/solidity/tvm_linker decode --tvc RootTokenContract.tvc | grep code: | cut -c 8- > RootTokenContract.txt &&
+/home/yaroslav/.tondev/solidity/tvm_linker decode --tvc TONTokenWallet.tvc | grep code: | cut -c 8- > TONTokenWallet.txt
+
+
+tondev js wrap SetcodeMultisigWallet.abi.json -o SetcodeMultisigWallet.js
+
+tondev sol compile DEXRoot.sol && tondev js wrap DEXRoot.abi.json -o ./tests-dex-ntd/DEXRoot.js
+tondev sol compile DEXClient.sol && tondev js wrap DEXClient.abi.json -o ./tests-dex-ntd/DEXClient.js
+
+tondev js wrap DEXClient.abi.json -o ./tests-dex-ntd/DEXClient.js && tondev js wrap DEXConnector.abi.json -o ./tests-dex-ntd/DEXConnector.js && tondev js wrap DEXPair.abi.json -o ./tests-dex-ntd/DEXPair.js && tondev js wrap DEXRoot.abi.json -o ./tests-dex-ntd/DEXRoot.js && tondev js wrap RootTokenContract.abi.json -o ./tests-dex-ntd/RootTokenContract.js && tondev js wrap TONTokenWallet.abi.json -o ./tests-dex-ntd/TONTokenWallet.js
