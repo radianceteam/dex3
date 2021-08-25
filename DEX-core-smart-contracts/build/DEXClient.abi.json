@@ -5,6 +5,7 @@
 		{
 			"name": "constructor",
 			"inputs": [
+				{"name":"ownerAddr","type":"address"}
 			],
 			"outputs": [
 			]
@@ -203,6 +204,18 @@
 			]
 		},
 		{
+			"name": "sendTransaction",
+			"inputs": [
+				{"name":"dest","type":"address"},
+				{"name":"value","type":"uint128"},
+				{"name":"bounce","type":"bool"},
+				{"name":"flags","type":"uint8"},
+				{"name":"payload","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "rootDEX",
 			"inputs": [
 			],
@@ -224,6 +237,14 @@
 			],
 			"outputs": [
 				{"name":"codeDEXConnector","type":"cell"}
+			]
+		},
+		{
+			"name": "owner",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"owner","type":"address"}
 			]
 		},
 		{
