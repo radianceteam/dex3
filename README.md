@@ -31,18 +31,18 @@ https://docs.google.com/drawings/d/176G8UEKKl_HBiC55Fq_2GYG0pdHdxxJrvAhbCLuFzhM/
 
 ## DEX-core-smart-contracts net.ton.dev implementation
 - RootTokenContract.sol
-  * wTON https://net.ton.live/accounts/accountDetails?id=0%3Ad214d4779f63e062569a39d414a98c9891cf5e97cc790a3e6c62ce5fd0a5e1c9
-  * wUSDT https://net.ton.live/accounts/accountDetails?id=0%3A8ed631b2691e55ddc65065e0475d82a0b776307797b31a2683a3af7b5c26b984
-  * wBTC https://net.ton.live/accounts/accountDetails?id=0%3A32354f00d4f7c6adea7da52e9300a5aa0321523a85c8e759ccea947578ace4c3
-  * wETH https://net.ton.live/accounts/accountDetails?id=0%3Ac58d18098ddc6a469308e41555699384f5f2dc83ff3d55cb61a3bdabcb9d3b01
+  * wTON https://net.ton.live/accounts/accountDetails?id=0%8ef414bdf6f3bf4b02a21e5f78a5e65a9f72aedb3b098e6fd68f54910648811a
+  * wUSDT https://net.ton.live/accounts/accountDetails?id=0%2cf5f485b8cd4ce3b4eb85100a1d9a86f8c8b59f12475331403f4e8ba12086ba
+  * wBTC https://net.ton.live/accounts/accountDetails?id=0%06bb5c37c26aab855dc9de3fa01920523a4589a04e98009e0a902985fd49754c
+  * wETH https://net.ton.live/accounts/accountDetails?id=0%0983f2ffb833c55a09f148843d1586af4303e469079a48626ba0b98fda422d3b
 
 - DEXRoot.sol
-  * https://net.ton.live/accounts/accountDetails?id=0%3Afcbf50fa63a7121565bb8dec1cbb7e75c8e7f7d1222cd4a827ffcb86fbb3fc42
+  * https://net.ton.live/accounts/accountDetails?id=0%ea01eb111ca5f76586d1d9c118cad84eedbda54fcc9a52e3bced8223885015a6
 
 - DEXPair.sol
-  * wTON-wUSDT https://net.ton.live/accounts/accountDetails?id=0%3Afff130f6bc7f66a9f6f631fe99513a60c6764cb2cc88309473d3a420ba43fb59
-  * wTON-wBTC https://net.ton.live/accounts/accountDetails?id=0%3Afb2268af57152134bc1a7c8b87f288c42a9653ee559b58175cc2d1dfd4aff9c0
-  * wTON-wETH https://net.ton.live/accounts/accountDetails?id=0%3Af5438acd3ab1b29007c7784ec8ee400ae350db4fe3dbb8deca60128e795e65dc
+  * wTON-wUSDT https://net.ton.live/accounts/accountDetails?id=0%eb767854fa782e12d942addfcbf86564310e00f90e8b2c609f87cead2794814f
+  * wTON-wBTC https://net.ton.live/accounts/accountDetails?id=0%e5a9837c44efc99130cc51887f89e21081781a44f3d0beb9d714815397e69dc5
+  * wTON-wETH https://net.ton.live/accounts/accountDetails?id=0%ea6f458a51404afa476e1cce1e4fb562dfec71eb6b8de9610adc395219a8f98f
 
 ## DEX-core-smart-contracts tests
 

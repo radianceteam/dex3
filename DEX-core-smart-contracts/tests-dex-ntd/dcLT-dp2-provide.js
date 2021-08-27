@@ -2,7 +2,7 @@ const {TonClient, abiContract, signerKeys} = require("@tonclient/core");
 const { libNode } = require("@tonclient/lib-node");
 const { Account } = require("@tonclient/appkit");
 const { DEXClientContract } = require("./DEXClient.js");
-const { RootTokenContract } = require("./RootTokenContract.js");
+const { RootTokenContractContract } = require("./RootTokenContract.js");
 const { TONTokenWalletContract } = require("./TONTokenWallet.js");
 const dotenv = require('dotenv').config();
 const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
@@ -75,13 +75,13 @@ async function main(client) {
 
   const rootKeysA = JSON.parse(fs.readFileSync(currentRootA,{encoding: "utf8"})).keys;
   const rootAddrA = JSON.parse(fs.readFileSync(currentRootA,{encoding: "utf8"})).address;
-  const rootAccA = new Account(RootTokenContract, {address: rootAddrA,signer:rootKeysA,client,});
+  const rootAccA = new Account(RootTokenContractContract, {address: rootAddrA,signer:rootKeysA,client,});
   console.log("rootAddrA:", rootAddrA);
 
 
   const rootKeysB = JSON.parse(fs.readFileSync(currentRootB,{encoding: "utf8"})).keys;
   const rootAddrB = JSON.parse(fs.readFileSync(currentRootB,{encoding: "utf8"})).address;
-  const rootAccB = new Account(RootTokenContract, {address: rootAddrB,signer:rootKeysB,client,});
+  const rootAccB = new Account(RootTokenContractContract, {address: rootAddrB,signer:rootKeysB,client,});
   console.log("rootAddrB:", rootAddrB);
 
 
