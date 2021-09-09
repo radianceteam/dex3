@@ -178,37 +178,26 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
 
   // Function to calculate qty B asset for qty A asset base on current pair reserves
   function qtyBforA(uint128 arg0) private inline view returns (uint128) {
-    require(arg0 > 0, 105);
-    require(balanceReserve[rootA] > 0 && balanceReserve[rootB] > 0, 106);
     return math.muldiv(arg0, balanceReserve[rootB], balanceReserve[rootA]);
   }
 
   // Function to calculate qty A asset for qty B asset base on current pair reserves
   function qtyAforB(uint128 arg1) private inline view returns (uint128) {
-    require(arg1 > 0, 107);
-    require(balanceReserve[rootA] > 0 && balanceReserve[rootB] > 0, 106);
     return math.muldiv(arg1, balanceReserve[rootA], balanceReserve[rootB]);
   }
 
   // Function to calculate qty LP tokens for asset A base on current pair reserves and totalSupply
   function liquidityA(uint128 arg0) private inline view returns (uint128) {
-    require(arg0 > 0, 105);
-    require(totalSupply > 0, 110);
-    require(balanceReserve[rootA] > 0, 108);
     return math.muldiv(arg0, totalSupply, balanceReserve[rootA]);
   }
 
   // Function to calculate qty LP tokens for asset B base on current pair reserves and totalSupply
   function liquidityB(uint128 arg1) private inline view returns (uint128) {
-    require(arg1 > 0, 105);
-    require(totalSupply > 0, 110);
-    require(balanceReserve[rootB] > 0, 109);
     return math.muldiv(arg1, totalSupply, balanceReserve[rootB]);
   }
 
   // Function for calculating accepted tokens
   function acceptForProvide(uint128 arg0, uint128 arg1) private inline view returns (uint128, uint128) {
-    require(balanceReserve[rootA] > 0 && balanceReserve[rootB] > 0, 106);
     uint128 qtyB = qtyBforA(arg0);
     uint128 qtyA = qtyAforB(arg1);
     uint128 minAmountA = math.min(arg0, qtyA);
@@ -299,7 +288,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
           if (processingStatus[rootA][arg1] == true && processingStatus[rootB][arg1] == true) {
             uint128 amountA = processingData[rootA][arg1];
             uint128 amountB = processingData[rootB][arg1];
-            if (totalSupply == 0 && balanceReserve[rootA] == 0 && balanceReserve[rootB] == 0) {
+            if (totalSupply == 0 || balanceReserve[rootA] == 0 || balanceReserve[rootB] == 0) {
               uint128 liquidity = math.min(amountA,amountB);
               balanceReserve[rootA] += amountA;
               balanceReserve[rootB] += amountB;
@@ -410,7 +399,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
           if (processingStatus[rootA][arg1] == true && processingStatus[rootB][arg1] == true) {
             uint128 amountA = processingData[rootA][arg1];
             uint128 amountB = processingData[rootB][arg1];
-            if (totalSupply == 0 && balanceReserve[rootA] == 0 && balanceReserve[rootB] == 0) {
+            if (totalSupply == 0 || balanceReserve[rootA] == 0 || balanceReserve[rootB] == 0) {
               uint128 liquidity = math.min(amountA,amountB);
               balanceReserve[rootA] += amountA;
               balanceReserve[rootB] += amountB;
