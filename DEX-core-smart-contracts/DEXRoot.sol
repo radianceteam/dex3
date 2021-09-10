@@ -139,6 +139,7 @@ contract DEXroot is IDEXRoot {
 
 	function createDEXclientCallback(uint256 pubkey, address deployedAddress, address owner) public override internalMsg {
 		tvm.rawReserve(address(this).balance - msg.value, 2);
+		require (pubkey != 0 && !pubkeys.exists(pubkey) && !clients.exists(deployedAddress), 113);
 		pubkeys[pubkey] = deployedAddress;
 		clients[deployedAddress] = pubkey;
 		clientKeys.push(deployedAddress);

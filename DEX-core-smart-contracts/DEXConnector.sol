@@ -23,12 +23,6 @@ contract DEXConnector is IExpectedWalletAddressCallback, IDEXConnector {
   address public driven;
   bool public statusConnected;
 
-  // Modifier that allows public function to accept any external calls.
-	modifier alwaysAccept {
-		tvm.accept();
-		_;
-	}
-
   modifier checkOwnerAndAccept {
     // Check that message from contract owner.
     require(msg.sender == dexclient, 101);

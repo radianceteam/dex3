@@ -69,22 +69,15 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
   uint128 constant GRAMS_RETURN = 0.2 ton;
   uint128 constant GRAMS_CALLBACK = 0.5 ton;
 
-
-  // Modifier that allows public function to accept any external calls.
-  modifier alwaysAccept {
-    tvm.accept();
-    _;
-  }
-
   modifier checkOwnerAndAccept {
     require(msg.sender == rootDEX, 102);
     tvm.accept();
     _;
   }
 
-  modifier checkPubKeyAndAccept {
-    require(msg.pubkey() == tvm.pubkey(), 103);
-    tvm.accept();
+  modifier checkConnectorAndAccept {
+    require(connectors.exists(msg.sender), 109);
+    tvm.rawReserve(address(this).balance - msg.value, 2);
     _;
   }
 
@@ -132,7 +125,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
   }
 
   // Function to callbacks from DEX Connector about connected TON Token Wallet of Root Token Contract.
-  function connectCallback(address wallet) public override alwaysAccept {
+  function connectCallback(address wallet) public override checkConnectorAndAccept {
     address connector = msg.sender;
     if (connectors.exists(connector)) {
       Connector cr = connectors[connector];
@@ -240,7 +233,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     address original_gas_to,
     uint128 updated_balance,
     TvmCell payload
-  ) public override alwaysAccept {
+  ) public override {
+    tvm.rawReserve(address(this).balance - msg.value, 2);
     if (msg.sender == walletReserve[rootA] || msg.sender == walletReserve[rootB]) {
       if (counterCallback > 10) {
         Callback cc = callbacks[counterCallback];
@@ -261,7 +255,6 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
         counterCallback++;
         delete callbacks[getFirstCallback()];
         if (arg0 == 1) {
-          tvm.rawReserve(address(this).balance - msg.value, 2);
           uint128 amountOut = getAmountOut(amount, token_root, arg1);
           if (!(amountOut > balanceReserve[arg1])){
             balanceReserve[token_root] += amount;
@@ -281,7 +274,6 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
           }
         }
         if (arg0 == 2) {
-          tvm.rawReserve(address(this).balance - msg.value, 2);
           processingStatus[token_root][arg1] = true;
           processingData[token_root][arg1] += amount;
           processingDest[token_root][arg1] = sender_wallet;
@@ -372,7 +364,6 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
         callbacks[counterCallback] = cc;
         counterCallback++;
         if (arg0 == 1) {
-          tvm.rawReserve(address(this).balance - msg.value, 2);
           uint128 amountOut = getAmountOut(amount, token_root, arg1);
           if (!(amountOut > balanceReserve[arg1])){
             balanceReserve[token_root] += amount;
@@ -392,7 +383,6 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
           }
         }
         if (arg0 == 2) {
-          tvm.rawReserve(address(this).balance - msg.value, 2);
           processingStatus[token_root][arg1] = true;
           processingData[token_root][arg1] += amount;
           processingDest[token_root][arg1] = sender_wallet;
@@ -476,9 +466,9 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     address sender_address,
     address wallet_address,
     address send_gas_to
-  ) public override alwaysAccept {
+  ) public override  {
+    tvm.rawReserve(address(this).balance - msg.value, 2);
     if (msg.sender == rootAB) {
-      tvm.rawReserve(address(this).balance - msg.value, 2);
       TvmSlice slice = payload.toSlice();
       (uint8 arg0, address arg1, address arg2) = slice.decode(uint8, address, address);
       if (counterCallback > 10) {
@@ -552,7 +542,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     }
   }
 
-  function getCallback(uint id) public view checkPubKeyAndAccept returns (
+  function getCallback(uint id) public view returns (
     address token_wallet,
     address token_root,
     uint128 amount,
