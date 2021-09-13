@@ -34,10 +34,6 @@ contract DEXConnector is IExpectedWalletAddressCallback, IDEXConnector {
       statusConnected = false;
   }
 
-  /*
-  * Public functions
-  */
-
   // Function to get Quotient of division
   function getQuotient(uint128 arg0, uint128 arg1, uint128 arg2) private inline pure returns (uint128) {
     (uint128 quotient, ) = math.muldivmod(arg0, arg1, arg2);

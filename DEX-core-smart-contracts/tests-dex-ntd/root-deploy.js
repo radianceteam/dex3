@@ -1,14 +1,20 @@
 const {TonClient, abiContract, signerKeys} = require("@tonclient/core");
 const { libNode } = require("@tonclient/lib-node");
 const { Account } = require("@tonclient/appkit");
+
 const { DEXRootContract } = require("./DEXRoot.js");
-const { DEXRootCode } = require("./DEXRootCode.js");
+// const { DEXRootCode } = require("./DEXRootCode.js");
+const { DEXClientContract } = require("./DEXClient.js");
+const { DEXPairContract } = require("./DEXPair.js");
+const { DEXConnectorContract } = require("./DEXConnector.js");
+const { RootTokenContractContract } = require("./RootTokenContract.js");
+const { TONTokenWalletContract } = require("./TONTokenWallet.js");
 const { GiverContract } = require("./Giver.js");
 const fs = require('fs');
 const pathJson = './DEXRootContract.json';
 const dotenv = require('dotenv').config();
-const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
-const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
+const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev','https://gql.custler.net'];
+const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!","Hello fld dev net TON!"];
 const networkSelector = process.env.NET_SELECTOR;
 
 
@@ -24,10 +30,8 @@ async function main(client) {
   // const contractKeys = JSON.parse(fs.readFileSync(pathJson,{encoding: "utf8"})).keys;
 
   const contractKeys = signerKeys(await TonClient.default.crypto.generate_random_sign_keys());
-  const rootAcc = new Account(DEXRootContract, {
-    signer: contractKeys,
-    client,
-  });
+
+  const rootAcc = new Account(DEXRootContract, {signer: contractKeys,client,});
   const address = await rootAcc.getAddress();
   console.log(`Future address of the contract will be: ${address}`);
 
@@ -38,15 +42,24 @@ async function main(client) {
   } else if (networkSelector == 1) {
     const giverNTDAddress = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).address;;
     const giverNTDKeys = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).keys;
-    const giverNTDAcc = new Account(GiverContract, {
-      address: giverNTDAddress,
-      signer: giverNTDKeys,
-      client,
-    });
-    // Call `sendTransaction` function
-    response = await giverNTDAcc.run("sendTransaction", {dest:address,value:20000000000,bounce:false});
+    const giverNTDAcc = new Account(GiverContract, {address: giverNTDAddress,signer: giverNTDKeys,client,});
+    response = await giverNTDAcc.run("sendTransaction", {dest:address,value:20_000_000_000,bounce:false});
     console.log("Giver send 20 ton to address:", address, response.decoded.output);
-  } else if (networkSelector == 2){console.log('Pls set giver for main.ton.dev');} else {console.log('networkSelector is incorrect');}
+  } else if (networkSelector == 2){
+    console.log('Pls set giver for main.ton.dev');
+  } else if (networkSelector == 3){
+    const giverRTDAddress = JSON.parse(fs.readFileSync('./GiverContractRTD.json',{encoding: "utf8"})).address;;
+    const giverRTDKeys = JSON.parse(fs.readFileSync('./GiverContractRTD.json',{encoding: "utf8"})).keys;
+    const giverRTDAcc = new Account(GiverContract, {address: giverRTDAddress,signer: giverRTDKeys,client,});
+    response = await giverRTDAcc.run("sendTransaction", {dest:address,value:20_000_000_000,bounce:false});
+    console.log("Giver send 20 ton to address:", address, response.decoded.output);
+  } else if (networkSelector == 4){
+    const giverFLDAddress = JSON.parse(fs.readFileSync('./GiverContractFLD.json',{encoding: "utf8"})).address;;
+    const giverFLDKeys = JSON.parse(fs.readFileSync('./GiverContractFLD.json',{encoding: "utf8"})).keys;
+    const giverFLDAcc = new Account(GiverContract, {address: giverFLDAddress,signer: giverFLDKeys,client,});
+    response = await giverFLDAcc.run("sendTransaction", {dest:address,value:20_000_000_000,bounce:false});
+    console.log("Giver send 20 ton to address:", address, response.decoded.output);
+  } else {console.log('networkSelector is incorrect');}
 
   const keyJson = JSON.stringify({address:address, keys:contractKeys});
   fs.writeFileSync( pathJson, keyJson,{flag:'w'});
@@ -85,23 +98,23 @@ console.log(`Contract was deployed at address: ${address}`);
 
 
 // Call `setDEXconnectorCode` function
-response = await rootAcc.run("setDEXconnectorCode", {code:DEXRootCode.connector});
+response = await rootAcc.run("setDEXconnectorCode", {code:DEXConnectorContract.code});
 console.log("Contract reacted to your setDEXconnectorCode:", response.decoded.output);
 
 // Call `setDEXclientCode` function
-response = await rootAcc.run("setDEXclientCode", {code:DEXRootCode.client});
+response = await rootAcc.run("setDEXclientCode", {code:DEXClientContract.code});
 console.log("Contract reacted to your setDEXclientCode:", response.decoded.output);
 
 // Call `setDEXpairCode` function
-response = await rootAcc.run("setDEXpairCode", {code:DEXRootCode.pair});
+response = await rootAcc.run("setDEXpairCode", {code:DEXPairContract.code});
 console.log("Contract reacted to your setDEXpairCode:", response.decoded.output);
 
 // Call `setRootTokenCode` function
-response = await rootAcc.run("setRootTokenCode", {code:DEXRootCode.root});
+response = await rootAcc.run("setRootTokenCode", {code:RootTokenContractContract.code});
 console.log("Contract reacted to your setRootTokenCode:", response.decoded.output);
 
 // Call `setTONTokenWalletCode` function
-response = await rootAcc.run("setTONTokenWalletCode", {code:DEXRootCode.wallet});
+response = await rootAcc.run("setTONTokenWalletCode", {code:TONTokenWalletContract.code});
 console.log("Contract reacted to your setTONTokenWalletCode:", response.decoded.output);
 
 

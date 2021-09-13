@@ -5,8 +5,8 @@ const { DEXClientContract } = require("./DEXClient.js");
 const { DEXConnectorContract } = require("./DEXConnector.js");
 const { RootTokenContractContract } = require("./RootTokenContract.js");
 const dotenv = require('dotenv').config();
-const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
-const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
+const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev','https://gql.custler.net'];
+const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!","Hello fld dev net TON!"];
 const networkSelector = process.env.NET_SELECTOR;
 
 const fs = require('fs');
@@ -45,7 +45,7 @@ async function main(client) {
   let resultArr = JSON.parse(fs.readFileSync(pathJsonClient,{encoding: "utf8"}));
   const pairAddr = JSON.parse(fs.readFileSync(currentPairPath,{encoding: "utf8"})).address;
 
-  resultArr.splice(0, 4);
+  // resultArr.splice(0, 1);
 
   for (const item of resultArr) {
     // const item = resultArr[0];

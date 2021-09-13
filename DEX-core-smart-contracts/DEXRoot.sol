@@ -84,24 +84,29 @@ contract DEXroot is IDEXRoot {
 		}
 	}
 
-	function setDEXclientCode(TvmCell code) public checkOwnerAndAccept {
+	function setDEXclientCode(TvmCell code) public checkOwnerAndAccept returns (bool isSuccess){
 		codeDEXclient = code;
+		isSuccess = true;
 	}
 
-	function setDEXpairCode(TvmCell code) public checkOwnerAndAccept {
+	function setDEXpairCode(TvmCell code) public checkOwnerAndAccept returns (bool isSuccess){
 		codeDEXpair = code;
+		isSuccess = true;
 	}
 
-	function setDEXconnectorCode(TvmCell code) public checkOwnerAndAccept {
+	function setDEXconnectorCode(TvmCell code) public checkOwnerAndAccept returns (bool isSuccess){
 		codeDEXconnector = code;
+		isSuccess = true;
 	}
 
-	function setRootTokenCode(TvmCell code) public checkOwnerAndAccept {
+	function setRootTokenCode(TvmCell code) public checkOwnerAndAccept returns (bool isSuccess){
 		codeRootToken = code;
+		isSuccess = true;
 	}
 
-	function setTONTokenWalletCode(TvmCell code) public checkOwnerAndAccept {
+	function setTONTokenWalletCode(TvmCell code) public checkOwnerAndAccept returns (bool isSuccess){
 		codeTONTokenWallet = code;
+		isSuccess = true;
 	}
 
 	function computeClientAddress(uint256 pubkey, uint256 souint) private inline view returns (address) {
@@ -144,7 +149,7 @@ contract DEXroot is IDEXRoot {
 		clients[deployedAddress] = pubkey;
 		clientKeys.push(deployedAddress);
 		address returnTo = owner != address(0) ? owner : msg.sender;
-    returnTo.transfer({value: 0, bounce: true, flag: 128});
+		returnTo.transfer({value: 0, bounce: true, flag: 128});
 	}
 
 	function computePairAddress(
@@ -250,47 +255,47 @@ contract DEXroot is IDEXRoot {
 		tvm.rawReserve(address(this).balance - msg.value, 2);
 		uint128 grammsNeeded = grammsForPair + (2 * grammsForConnector) + (2 * grammsForWallet) + grammsForRoot + GRAMS_FOR_CALLBACK;
 		require(clients.exists(msg.sender) && msg.value >= grammsNeeded && root0 != root1 && !roots[root0].exists(root1) && !roots[root1].exists(root0), 112);
-			TvmCell stateInitR = tvm.buildStateInit({
-				contr: RootTokenContract,
-				varInit: {
-					_randomNonce:rootSoArg,
-					name:rootName,
-					symbol:rootSymbol,
-					decimals:rootDecimals,
-					wallet_code:codeTONTokenWallet
-				},
-				code: codeRootToken,
-				pubkey : clients[msg.sender]
-			});
-			address root01 = address(tvm.hash(stateInitR));
-			TvmCell stateInitP = tvm.buildStateInit({
-				contr: DEXPair,
-				varInit: {
-					rootDEX:address(this),
-					soUINT:pairSoArg,
-					creator:msg.sender,
-					codeDEXConnector:codeDEXconnector,
-					rootA:root0,
-					rootB:root1,
-					rootAB:root01
-				},
-				code: codeDEXpair,
-				pubkey: clients[msg.sender]
-			});
-			address pairAddress = new DEXPair{
-				stateInit: stateInitP,
-				flag: 0,
-				bounce : false,
-				value : grammsForPair + (2 * grammsForConnector) + (2 * grammsForWallet) + GRAMS_FOR_CALLBACK
-			}(connectorSoArg0, connectorSoArg1, grammsForConnector, grammsForWallet);
-			address rootAddress = new RootTokenContract{
-				stateInit: stateInitR,
-				flag: 0,
-				bounce : false,
-				value : grammsForRoot
-			}(0, pairAddress);
-			creatorForPair[pairAddress] = msg.sender;
-			msg.sender.transfer({ value: 0, flag: 128});
+		TvmCell stateInitR = tvm.buildStateInit({
+			contr: RootTokenContract,
+			varInit: {
+				_randomNonce:rootSoArg,
+				name:rootName,
+				symbol:rootSymbol,
+				decimals:rootDecimals,
+				wallet_code:codeTONTokenWallet
+			},
+			code: codeRootToken,
+			pubkey : clients[msg.sender]
+		});
+		address root01 = address(tvm.hash(stateInitR));
+		TvmCell stateInitP = tvm.buildStateInit({
+			contr: DEXPair,
+			varInit: {
+				rootDEX:address(this),
+				soUINT:pairSoArg,
+				creator:msg.sender,
+				codeDEXConnector:codeDEXconnector,
+				rootA:root0,
+				rootB:root1,
+				rootAB:root01
+			},
+			code: codeDEXpair,
+			pubkey: clients[msg.sender]
+		});
+		address pairAddress = new DEXPair{
+			stateInit: stateInitP,
+			flag: 0,
+			bounce : false,
+			value : grammsForPair + (2 * grammsForConnector) + (2 * grammsForWallet) + GRAMS_FOR_CALLBACK
+		}(connectorSoArg0, connectorSoArg1, grammsForConnector, grammsForWallet);
+		address rootAddress = new RootTokenContract{
+			stateInit: stateInitR,
+			flag: 0,
+			bounce : false,
+			value : grammsForRoot
+		}(0, pairAddress);
+		creatorForPair[pairAddress] = msg.sender;
+		msg.sender.transfer({ value: 0, flag: 128});
 	}
 
 	function createDEXpairCallback(address root0, address root1, address root01) public override internalMsg {
@@ -306,7 +311,7 @@ contract DEXroot is IDEXRoot {
 			dataForRootAB[root01] = cd;
 			RootTokenContract(root01).getDetails{value: 0, flag: 128, callback: DEXroot.getDetailsCallback}();
 		} else {
-      delete creatorForPair[pairAddress];
+			delete creatorForPair[pairAddress];
 			creator.transfer({ value: 0, flag: 128});
 		}
 	}
@@ -360,6 +365,19 @@ contract DEXroot is IDEXRoot {
 	// Function to get balance TONgrams for DEXroot.
 	function getBalanceTONgrams() public pure returns (uint128 balanceTONgrams){
 		return address(this).balance;
+	}
+
+	function encodePayload(TvmCell payload) public view returns (uint8 arg0, address arg1, address arg2, uint128 arg3, uint128 arg4){
+		TvmSlice slice = payload.toSlice();
+		(arg0, arg1, arg2, arg3, arg4) = slice.decode(uint8, address, address, uint128, uint128);
+	}
+
+	function computeCodeHash(TvmCell code) public view returns (uint256) {
+			return tvm.hash(code);
+	}
+
+	function hashRootTokenContract() public view returns (uint256) {
+			return tvm.hash(codeRootToken);
 	}
 
 }

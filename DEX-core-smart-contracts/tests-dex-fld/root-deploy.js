@@ -39,13 +39,8 @@ async function main(client) {
   } else if (networkSelector == 1) {
     const giverNTDAddress = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).address;;
     const giverNTDKeys = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).keys;
-    const giverNTDAcc = new Account(GiverContractNTD, {
-      address: giverNTDAddress,
-      signer: giverNTDKeys,
-      client,
-    });
-    // Call `sendTransaction` function
-    response = await giverNTDAcc.run("sendTransaction", {dest:rootAddr,value:20000000000,bounce:false});
+    const giverNTDAcc = new Account(GiverContractNTD, {address: giverNTDAddress,signer: giverNTDKeys,client,});
+    response = await giverNTDAcc.run("sendTransaction", {dest:rootAddr,value:20_000_000_000,bounce:false});
     console.log("Giver send 20 ton to address:", rootAddr, response.decoded.output);
   } else if (networkSelector == 2){
    console.log('Pls set giver for main.ton.dev');
@@ -53,15 +48,13 @@ async function main(client) {
      const giverRTDAddress = JSON.parse(fs.readFileSync('./GiverContractRTD.json',{encoding: "utf8"})).address;;
      const giverRTDKeys = JSON.parse(fs.readFileSync('./GiverContractRTD.json',{encoding: "utf8"})).keys;
      const giverRTDAcc = new Account(GiverContract, {address: giverRTDAddress,signer: giverRTDKeys,client,});
-     // Call `sendTransaction` function
-     response = await giverRTDAcc.run("sendTransaction", {dest:rootAddr,value:20000000000,bounce:false});
+     response = await giverRTDAcc.run("sendTransaction", {dest:rootAddr,value:20_000_000_000,bounce:false});
      console.log("Giver send 20 ton to rootAddr:", response.decoded.output);
    } else if (networkSelector == 4){
      const giverFLDAddress = JSON.parse(fs.readFileSync('./GiverContractFLD.json',{encoding: "utf8"})).address;;
      const giverFLDKeys = JSON.parse(fs.readFileSync('./GiverContractFLD.json',{encoding: "utf8"})).keys;
      const giverFLDAcc = new Account(GiverContract, {address: giverFLDAddress,signer: giverFLDKeys,client,});
-     // Call `sendTransaction` function
-     response = await giverFLDAcc.run("sendTransaction", {dest:rootAddr,value:100000000000,bounce:false});
+     response = await giverFLDAcc.run("sendTransaction", {dest:rootAddr,value:20_000_000_000,bounce:false});
      console.log("Giver send 100 ton to rootAddr:", response.decoded.output);
    } else {console.log('networkSelector is incorrect');}
 

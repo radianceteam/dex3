@@ -83,7 +83,9 @@
 				{"name":"updated_balance","type":"uint128"},
 				{"name":"payload_arg0","type":"uint8"},
 				{"name":"payload_arg1","type":"address"},
-				{"name":"payload_arg2","type":"address"}
+				{"name":"payload_arg2","type":"address"},
+				{"name":"payload_arg3","type":"uint128"},
+				{"name":"payload_arg4","type":"uint128"}
 			]
 		},
 		{
@@ -229,6 +231,14 @@
 			],
 			"outputs": [
 				{"name":"counterCallback","type":"uint256"}
+			]
+		},
+		{
+			"name": "callbacks",
+			"inputs": [
+			],
+			"outputs": [
+				{"components":[{"name":"token_wallet","type":"address"},{"name":"token_root","type":"address"},{"name":"amount","type":"uint128"},{"name":"sender_public_key","type":"uint256"},{"name":"sender_address","type":"address"},{"name":"sender_wallet","type":"address"},{"name":"original_gas_to","type":"address"},{"name":"updated_balance","type":"uint128"},{"name":"payload_arg0","type":"uint8"},{"name":"payload_arg1","type":"address"},{"name":"payload_arg2","type":"address"},{"name":"payload_arg3","type":"uint128"},{"name":"payload_arg4","type":"uint128"}],"name":"callbacks","type":"map(uint256,tuple)"}
 			]
 		}
 	],

@@ -5,8 +5,8 @@ const { DEXClientContract } = require("./DEXClient.js");
 const { RootTokenContractContract } = require("./RootTokenContract.js");
 const { TONTokenWalletContract } = require("./TONTokenWallet.js");
 const dotenv = require('dotenv').config();
-const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
-const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
+const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev','https://gql.custler.net'];
+const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!","Hello fld dev net TON!"];
 const networkSelector = process.env.NET_SELECTOR;
 
 const CoinGecko = require('coingecko-api');

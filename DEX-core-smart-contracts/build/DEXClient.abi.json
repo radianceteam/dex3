@@ -74,7 +74,9 @@
 			"name": "processSwapA",
 			"inputs": [
 				{"name":"pairAddr","type":"address"},
-				{"name":"qtyA","type":"uint128"}
+				{"name":"qtyA","type":"uint128"},
+				{"name":"minQtyB","type":"uint128"},
+				{"name":"maxQtyB","type":"uint128"}
 			],
 			"outputs": [
 				{"name":"processSwapStatus","type":"bool"}
@@ -84,7 +86,9 @@
 			"name": "processSwapB",
 			"inputs": [
 				{"name":"pairAddr","type":"address"},
-				{"name":"qtyB","type":"uint128"}
+				{"name":"qtyB","type":"uint128"},
+				{"name":"minQtyA","type":"uint128"},
+				{"name":"maxQtyA","type":"uint128"}
 			],
 			"outputs": [
 				{"name":"processSwapStatus","type":"bool"}
@@ -143,7 +147,9 @@
 				{"name":"updated_balance","type":"uint128"},
 				{"name":"payload_arg0","type":"uint8"},
 				{"name":"payload_arg1","type":"address"},
-				{"name":"payload_arg2","type":"address"}
+				{"name":"payload_arg2","type":"address"},
+				{"name":"payload_arg3","type":"uint128"},
+				{"name":"payload_arg4","type":"uint128"}
 			]
 		},
 		{
@@ -216,6 +222,26 @@
 			]
 		},
 		{
+			"name": "deployLockStakeSafeCallback",
+			"inputs": [
+				{"name":"lockStakeSafe","type":"address"},
+				{"name":"nftKey","type":"address"},
+				{"name":"amount","type":"uint128"},
+				{"name":"period","type":"uint256"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "transferOwnershipCallback",
+			"inputs": [
+				{"name":"addrFrom","type":"address"},
+				{"name":"addrTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
 			"name": "rootDEX",
 			"inputs": [
 			],
@@ -272,11 +298,27 @@
 			]
 		},
 		{
+			"name": "souintLast",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"souintLast","type":"uint256"}
+			]
+		},
+		{
 			"name": "counterCallback",
 			"inputs": [
 			],
 			"outputs": [
 				{"name":"counterCallback","type":"uint256"}
+			]
+		},
+		{
+			"name": "callbacks",
+			"inputs": [
+			],
+			"outputs": [
+				{"components":[{"name":"token_wallet","type":"address"},{"name":"token_root","type":"address"},{"name":"amount","type":"uint128"},{"name":"sender_public_key","type":"uint256"},{"name":"sender_address","type":"address"},{"name":"sender_wallet","type":"address"},{"name":"original_gas_to","type":"address"},{"name":"updated_balance","type":"uint128"},{"name":"payload_arg0","type":"uint8"},{"name":"payload_arg1","type":"address"},{"name":"payload_arg2","type":"address"},{"name":"payload_arg3","type":"uint128"},{"name":"payload_arg4","type":"uint128"}],"name":"callbacks","type":"map(uint256,tuple)"}
 			]
 		},
 		{

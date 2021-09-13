@@ -7,8 +7,8 @@ const { DEXPairContract } = require("./DEXPair.js");
 const { RootTokenContractContract } = require("./RootTokenContract.js");
 const { TONTokenWalletContract } = require("./TONTokenWallet.js");
 const dotenv = require('dotenv').config();
-const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
-const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
+const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev','https://gql.custler.net'];
+const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!","Hello fld dev net TON!"];
 const networkSelector = process.env.NET_SELECTOR;
 const assert = require('assert');
 const { expect } = require('chai');
@@ -75,6 +75,8 @@ async function main(client) {
   let idealQtyB =  Math.round(((qtyA*997/1000)*reserveB) / reserveA);
   logger.log("((qtyA-fee(0.3%))*reserveB) / reserveA): ", idealQtyB);
   let getAmountOutResult = getAmountOut(qtyA, reserveA, reserveB);
+  let minQtyB = Math.round((getAmountOutResult/100)*99);
+  let maxQtyB = Math.round((getAmountOutResult/100)*101);
   logger.log("computed getAmountOut: ", getAmountOutResult);
   logger.log("shift %: ", ((idealQtyB / getAmountOutResult))*100-100);
   response = await clientAcc.runLocal("rootWallet", {});
@@ -90,7 +92,7 @@ async function main(client) {
   grammsBefore = response.decoded.output.value0;
   logger.log("client TON gramm balance before:", grammsBefore);
   timeBefore = Date.now();
-  responce = await clientAcc.run("processSwapA", {pairAddr:pairAddr,qtyA:qtyA});
+  responce = await clientAcc.run("processSwapA", {pairAddr:pairAddr,qtyA:qtyA,minQtyB:minQtyB,maxQtyB:maxQtyB});
   return responce.decoded.output.processSwapStatus;
 }
 

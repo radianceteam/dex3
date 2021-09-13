@@ -8,8 +8,8 @@ const { RootTokenContract } = require("./RootTokenContract.js");
 const { GiverContract } = require("./Giver.js");
 
 const dotenv = require('dotenv').config();
-const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
-const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
+const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev','https://gql.custler.net'];
+const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!","Hello fld dev net TON!"];
 const networkSelector = process.env.NET_SELECTOR;
 
 const fs = require('fs');
@@ -38,28 +38,32 @@ async function main(client) {
     const clientKeys = item.keys;
     const clientAddr = item.address;
 
-    if (networkSelector == 0) {
-      const giver = await Account.getGiverForClient(client);
-      await giver.sendTo(clientAddr, 100_000_000_000);
-      console.log(`Grams were transferred from giver to ${clientAddr}`);
-    } else if (networkSelector == 1) {
-      const giverNTDAddress = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).address;;
-      const giverNTDKeys = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).keys;
-      const giverNTDAcc = new Account(GiverContract, {address: giverNTDAddress,signer: giverNTDKeys,client,});
-      response = await giverNTDAcc.run("sendTransaction", {dest:clientAddr,value:10000000000,bounce:true});
-      console.log("Giver send 10 ton to clientAddr:", response.decoded.output);
-
-    } else if (networkSelector == 2){
-      console.log('Pls set giver for main.ton.dev');
-
-    } else if (networkSelector == 3){
+  if (networkSelector == 0) {
+    const giver = await Account.getGiverForClient(client);
+    await giver.sendTo(address, 100_000_000_000);
+    console.log(`Grams were transferred from giver to ${clientAddr}`);
+  } else if (networkSelector == 1) {
+    const giverNTDAddress = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).address;;
+    const giverNTDKeys = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).keys;
+    const giverNTDAcc = new Account(GiverContract, {address: giverNTDAddress,signer: giverNTDKeys,client,});
+    response = await giverNTDAcc.run("sendTransaction", {dest:clientAddr,value:10_000_000_000,bounce:false});
+    console.log("Giver send 10 ton to address:", clientAddr, response.decoded.output);
+  } else if (networkSelector == 2){
+    console.log('Pls set giver for main.ton.dev');
+  } else if (networkSelector == 3){
     const giverRTDAddress = JSON.parse(fs.readFileSync('./GiverContractRTD.json',{encoding: "utf8"})).address;;
     const giverRTDKeys = JSON.parse(fs.readFileSync('./GiverContractRTD.json',{encoding: "utf8"})).keys;
     const giverRTDAcc = new Account(GiverContract, {address: giverRTDAddress,signer: giverRTDKeys,client,});
-    response = await giverRTDAcc.run("sendTransaction", {dest:clientAddr,value:150000000000,bounce:false});
-    console.log("Giver send 150 ton to clientAddr:", response.decoded.output);
-
+    response = await giverRTDAcc.run("sendTransaction", {dest:clientAddr,value:10_000_000_000,bounce:false});
+    console.log("Giver send 10 ton to address:", clientAddr, response.decoded.output);
+  } else if (networkSelector == 4){
+    const giverFLDAddress = JSON.parse(fs.readFileSync('./GiverContractFLD.json',{encoding: "utf8"})).address;;
+    const giverFLDKeys = JSON.parse(fs.readFileSync('./GiverContractFLD.json',{encoding: "utf8"})).keys;
+    const giverFLDAcc = new Account(GiverContract, {address: giverFLDAddress,signer: giverFLDKeys,client,});
+    response = await giverFLDAcc.run("sendTransaction", {dest:clientAddr,value:10_000_000_000,bounce:false});
+    console.log("Giver send 10 ton to address:", clientAddr, response.decoded.output);
   } else {console.log('networkSelector is incorrect');}
+
 
   }
 

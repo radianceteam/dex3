@@ -5,8 +5,8 @@ const { DEXClientContract } = require("./DEXClient.js");
 const { DEXConnectorContract } = require("./DEXConnector.js");
 const { RootTokenContractContract } = require("./RootTokenContract.js");
 const dotenv = require('dotenv').config();
-const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
-const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
+const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev','https://gql.custler.net'];
+const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!","Hello fld dev net TON!"];
 const networkSelector = process.env.NET_SELECTOR;
 
 const fs = require('fs');
@@ -51,13 +51,16 @@ async function main(client) {
 
   let resultArr = JSON.parse(fs.readFileSync(pathJsonClient,{encoding: "utf8"}));
   const pairAddr = JSON.parse(fs.readFileSync(currentPairPath,{encoding: "utf8"})).address;
+
+  // resultArr = resultArr.splice(7, 1);
+
   for (const item of resultArr) {
     const clientKeys = item.keys;
     const clientAddr = item.address;
     const clientAcc = new Account(DEXClientContract, {address:clientAddr,signer:clientKeys,client,});
     // let k = 0;
-    // response = await clientAcc.runLocal("getAllDataPreparation", {});
-    // let pair = response.decoded.output.pairKeysR[k];
+    response = await clientAcc.runLocal("souintLast", {});
+    let souintLast = response.decoded.output.souintLast;
     response = await clientAcc.runLocal("pairs", {});
     let pairRoots = response.decoded.output.pairs[pairAddr];
     let rootA = pairRoots.rootA;
@@ -75,7 +78,7 @@ async function main(client) {
 
     let connectorSoArg0;
     status = false;
-    n = connectorSoArgArr[i];
+    n = souintLast + 1;
     while (!status) {
       response = await clientAcc.runLocal("getConnectorAddress", {_answer_id:0,connectorSoArg:n});
       let connectorAddr = response.decoded.output.value0;

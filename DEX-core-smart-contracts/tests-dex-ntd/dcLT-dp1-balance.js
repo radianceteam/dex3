@@ -2,11 +2,12 @@ const {TonClient, abiContract, signerKeys} = require("@tonclient/core");
 const { libNode } = require("@tonclient/lib-node");
 const { Account } = require("@tonclient/appkit");
 const { DEXClientContract } = require("./DEXClient.js");
+const { DEXPairContract } = require("./DEXPair.js");
 const { RootTokenContractContract } = require("./RootTokenContract.js");
 const { TONTokenWalletContract } = require("./TONTokenWallet.js");
 const dotenv = require('dotenv').config();
-const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
-const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
+const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev','https://gql.custler.net'];
+const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!","Hello fld dev net TON!"];
 const networkSelector = process.env.NET_SELECTOR;
 
 const CoinGecko = require('coingecko-api');
@@ -36,7 +37,7 @@ function convert(number, decimal) {
 TonClient.useBinaryLibrary(libNode);
 
 async function main(client) {
-  let responce;
+  let response;
   let resultArr = JSON.parse(fs.readFileSync(pathJsonClient,{encoding: "utf8"}));
   const pairAddr = JSON.parse(fs.readFileSync(currentPairPath,{encoding: "utf8"})).address;
   let tonusdData = await CoinGeckoClient.coins.fetch('ton-crystal', {});
@@ -57,8 +58,15 @@ async function main(client) {
   const rootAccB = new Account(RootTokenContractContract, {address: rootAddrB,signer:rootKeysB,client,});
   console.log("rootAddrB:", rootAddrB);
 
+  const pairAcc = new Account(DEXPairContract, {address: pairAddr,client,});
+  response = await pairAcc.runLocal("rootAB", {});
+  const rootAddrAB = response.decoded.output.rootAB;
+
+
 
   let clientCount = 0;
+  // resultArr.splice(7, 1);
+
   for (const item of resultArr) {
     console.log("======DEX client count:", clientCount);
     const clientKeys = item.keys;
@@ -69,10 +77,14 @@ async function main(client) {
     const walletAccA = new Account(TONTokenWalletContract, {address: walletRootA,client,});
     let walletRootB = response.decoded.output.rootWallet[rootAddrB];
     const walletAccB = new Account(TONTokenWalletContract, {address: walletRootB,client,});
+    let walletRootAB = response.decoded.output.rootWallet[rootAddrAB];
+    const walletAccAB = new Account(TONTokenWalletContract, {address: walletRootAB,client,});
     response = await walletAccA.runLocal("balance", {_answer_id:0});
     console.log("Token A balance:", response.decoded.output);
     response = await walletAccB.runLocal("balance", {_answer_id:0});
     console.log("Token B balance:", response.decoded.output);
+    response = await walletAccAB.runLocal("balance", {_answer_id:0});
+    console.log("Token AB balance:", response.decoded.output);
     response = await clientAcc.runLocal("getBalance", {_answer_id:0});
     console.log(" TON balance:", response.decoded.output);
     clientCount++;

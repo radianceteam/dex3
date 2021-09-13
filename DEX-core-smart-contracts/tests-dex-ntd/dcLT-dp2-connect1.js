@@ -5,8 +5,8 @@ const { DEXClientContract } = require("./DEXClient.js");
 const { DEXConnectorContract } = require("./DEXConnector.js");
 const { RootTokenContractContract } = require("./RootTokenContract.js");
 const dotenv = require('dotenv').config();
-const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
-const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!"];
+const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev','https://gql.custler.net'];
+const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!","Hello fld dev net TON!"];
 const networkSelector = process.env.NET_SELECTOR;
 
 const fs = require('fs');
@@ -45,7 +45,7 @@ function getShard(string) {
 
 
 async function main(client) {
-  let responce;
+  let response;
   let connectorSoArgArr1 = JSON.parse(fs.readFileSync(pathJsonClientSoData1,{encoding: "utf8"}));
   let connectorSoArgArr2 = [];
   let i = 0;
@@ -55,11 +55,18 @@ async function main(client) {
   let resultArr = JSON.parse(fs.readFileSync(pathJsonClient,{encoding: "utf8"}));
   const pairAddr = JSON.parse(fs.readFileSync(currentPairPath,{encoding: "utf8"})).address;
 
-  // for (const item of resultArr) {
-    const item = resultArr[0];
+  resultArr = resultArr.splice(1, 9);
+
+
+  for (const item of resultArr) {
+    // const item = resultArr[0];
     const clientKeys = item.keys;
     const clientAddr = item.address;
     const clientAcc = new Account(DEXClientContract, {address:clientAddr,signer:clientKeys,client,});
+
+    response = await clientAcc.runLocal("souintLast", {});
+    let souintLast = response.decoded.output.souintLast;
+
     // let k = 0;
     // response = await clientAcc.runLocal("getAllDataPreparation", {});
     // let pair = response.decoded.output.pairKeysR[k];
@@ -80,7 +87,7 @@ async function main(client) {
 
     let connectorSoArg0;
     status = false;
-    n = connectorSoArgArr1[i];
+    n = souintLast + 1;
     while (!status) {
       response = await clientAcc.runLocal("getConnectorAddress", {_answer_id:0,connectorSoArg:n});
       let connectorAddr = response.decoded.output.value0;
@@ -168,7 +175,7 @@ async function main(client) {
     i++;
 
 
-  // }
+  }
 
 }
 

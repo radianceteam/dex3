@@ -58,9 +58,11 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     uint8 payload_arg0;
     address payload_arg1;
     address payload_arg2;
+    uint128 payload_arg3;
+    uint128 payload_arg4;
   }
 
-  mapping (uint => Callback) callbacks;
+  mapping (uint => Callback) public callbacks;
 
   // Grams constants
   uint128 constant GRAMS_SET_CALLBACK_ADDR = 0.5 ton;
@@ -222,6 +224,11 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     if (rc.hasValue()) {(uint number, ) = rc.get();return number;} else {return 0;}
   }
 
+  // Function for get paired token.
+  function pairedTokenRootFor(address rootIn) private view returns (address) {
+    return rootIn == rootA ? rootB : rootA;
+  }
+
   // Function to callback from TON Token Wallet of Root Token Contract to DEX Pair.
   function tokensReceivedCallback(
     address token_wallet,
@@ -247,27 +254,30 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
         cc.original_gas_to = original_gas_to;
         cc.updated_balance = updated_balance;
         TvmSlice slice = payload.toSlice();
-        (uint8 arg0, address arg1, address arg2) = slice.decode(uint8, address, address);
+        (uint8 arg0, address arg1, address arg2, uint128 arg3, uint128 arg4) = slice.decode(uint8, address, address, uint128, uint128);
         cc.payload_arg0 = arg0;
         cc.payload_arg1 = arg1;
         cc.payload_arg2 = arg2;
+        cc.payload_arg3 = arg3;
+        cc.payload_arg4 = arg4;
         callbacks[counterCallback] = cc;
         counterCallback++;
         delete callbacks[getFirstCallback()];
         if (arg0 == 1) {
-          uint128 amountOut = getAmountOut(amount, token_root, arg1);
-          if (!(amountOut > balanceReserve[arg1])){
+          address paired_token_root = pairedTokenRootFor(token_root);
+          uint128 amountOut = getAmountOut(amount, token_root, paired_token_root);
+          if (amountOut <= balanceReserve[paired_token_root] && amountOut >= arg3 && amountOut <= arg4){
             balanceReserve[token_root] += amount;
-            balanceReserve[arg1] -= amountOut;
+            balanceReserve[paired_token_root] -= amountOut;
             syncStatus[token_root] = balanceReserve[token_root] == updated_balance ? true : false;
             TvmBuilder builder;
-            builder.store(uint8(0), address(0), address(0));
+            builder.store(uint8(0), sender_wallet, arg2, amount, amountOut);
             TvmCell new_payload = builder.toCell();
-            TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[arg1]).transfer, arg2, amountOut, new_payload);
-            rootConnector[arg1].transfer({value: 0, bounce:true, flag: 128, body:body});
+            TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[paired_token_root]).transfer, arg2, amountOut, new_payload);
+            rootConnector[paired_token_root].transfer({value: 0, bounce:true, flag: 128, body:body});
           } else {
             TvmBuilder builder;
-            builder.store(uint8(8), address(0), address(0));
+            builder.store(uint8(8), sender_wallet, arg2, amount, amountOut);
             TvmCell new_payload = builder.toCell();
             TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[token_root]).transfer, sender_wallet, amount, new_payload);
             rootConnector[token_root].transfer({value: 0, bounce:true, flag: 128, body:body});
@@ -302,7 +312,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                 rootAB.transfer({value: GRAMS_MINT, bounce:true, body:body});
                 if (unusedReturnA > 0 && unusedReturnB > 0) {
                   TvmBuilder builder;
-                  builder.store(uint8(7), address(0), address(0));
+                  builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
                   TvmCell new_payload = builder.toCell();
                   TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, processingDest[rootA][arg1], unusedReturnA, new_payload);
                   TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, processingDest[rootB][arg1], unusedReturnB, new_payload);
@@ -312,7 +322,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   arg1.transfer({ value: 0, flag: 128});
                 } else if (unusedReturnA > 0) {
                   TvmBuilder builder;
-                  builder.store(uint8(7), address(0), address(0));
+                  builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
                   TvmCell new_payload = builder.toCell();
                   TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, processingDest[rootA][arg1], unusedReturnA, new_payload);
                   rootConnector[rootA].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyA});
@@ -320,7 +330,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   arg1.transfer({ value: 0, flag: 128});
                 } else if (unusedReturnB > 0) {
                   TvmBuilder builder;
-                  builder.store(uint8(7), address(0), address(0));
+                  builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
                   TvmCell new_payload = builder.toCell();
                   TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, processingDest[rootB][arg1], unusedReturnB, new_payload);
                   rootConnector[rootB].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyB});
@@ -332,7 +342,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                 }
               } else {
                 TvmBuilder builder;
-                builder.store(uint8(9), address(0), address(0));
+                builder.store(uint8(9), address(0), address(0), uint128(9), uint128(9));
                 TvmCell new_payload = builder.toCell();
                 TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, processingDest[rootA][arg1], amountA, new_payload);
                 TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, processingDest[rootB][arg1], amountB, new_payload);
@@ -357,28 +367,31 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
         cc.original_gas_to = original_gas_to;
         cc.updated_balance = updated_balance;
         TvmSlice slice = payload.toSlice();
-        (uint8 arg0, address arg1, address arg2) = slice.decode(uint8, address, address);
+        (uint8 arg0, address arg1, address arg2, uint128 arg3, uint128 arg4) = slice.decode(uint8, address, address, uint128, uint128);
         cc.payload_arg0 = arg0;
         cc.payload_arg1 = arg1;
         cc.payload_arg2 = arg2;
+        cc.payload_arg3 = arg3;
+        cc.payload_arg4 = arg4;
         callbacks[counterCallback] = cc;
         counterCallback++;
         if (arg0 == 1) {
-          uint128 amountOut = getAmountOut(amount, token_root, arg1);
-          if (!(amountOut > balanceReserve[arg1])){
+          address paired_token_root = pairedTokenRootFor(token_root);
+          uint128 amountOut = getAmountOut(amount, token_root, paired_token_root);
+          if (amountOut <= balanceReserve[paired_token_root] && amountOut >= arg3 && amountOut <= arg4){
             balanceReserve[token_root] += amount;
-            balanceReserve[arg1] -= amountOut;
+            balanceReserve[paired_token_root] -= amountOut;
             syncStatus[token_root] = balanceReserve[token_root] == updated_balance ? true : false;
             TvmBuilder builder;
-            builder.store(uint8(0), address(0), address(0));
+            builder.store(uint8(0), sender_wallet, arg2, amount, amountOut);
             TvmCell new_payload = builder.toCell();
-            TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[arg1]).transfer, arg2, amountOut, new_payload);
-            rootConnector[arg1].transfer({value: 0, bounce:true, flag: 128, body:body});
+            TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[paired_token_root]).transfer, arg2, amountOut, new_payload);
+            rootConnector[paired_token_root].transfer({value: 0, bounce:true, flag: 128, body:body});
           } else {
             TvmBuilder builder;
-            builder.store(uint8(8), address(0), address(0));
+            builder.store(uint8(8), sender_wallet, arg2, amount, amountOut);
             TvmCell new_payload = builder.toCell();
-            TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[token_root]).transfer, token_wallet, amount, new_payload);
+            TvmCell body = tvm.encodeBody(IDEXConnector(rootConnector[token_root]).transfer, sender_wallet, amount, new_payload);
             rootConnector[token_root].transfer({value: 0, bounce:true, flag: 128, body:body});
           }
         }
@@ -411,7 +424,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                 rootAB.transfer({value: GRAMS_MINT, bounce:true, body:body});
                 if (unusedReturnA > 0 && unusedReturnB > 0) {
                   TvmBuilder builder;
-                  builder.store(uint8(7), address(0), address(0));
+                  builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
                   TvmCell new_payload = builder.toCell();
                   TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, processingDest[rootA][arg1], unusedReturnA, new_payload);
                   TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, processingDest[rootB][arg1], unusedReturnB, new_payload);
@@ -421,7 +434,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   arg1.transfer({ value: 0, flag: 128});
                 } else if (unusedReturnA > 0) {
                   TvmBuilder builder;
-                  builder.store(uint8(7), address(0), address(0));
+                  builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
                   TvmCell new_payload = builder.toCell();
                   TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, processingDest[rootA][arg1], unusedReturnA, new_payload);
                   rootConnector[rootA].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyA});
@@ -429,7 +442,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   arg1.transfer({ value: 0, flag: 128});
                 } else if (unusedReturnB > 0) {
                   TvmBuilder builder;
-                  builder.store(uint8(7), address(0), address(0));
+                  builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
                   TvmCell new_payload = builder.toCell();
                   TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, processingDest[rootB][arg1], unusedReturnB, new_payload);
                   rootConnector[rootB].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyB});
@@ -441,7 +454,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                 }
               } else {
                 TvmBuilder builder;
-                builder.store(uint8(9), address(0), address(0));
+                builder.store(uint8(9), address(0), address(0), uint128(9), uint128(9));
                 TvmCell new_payload = builder.toCell();
                 TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, processingDest[rootA][arg1], amountA, new_payload);
                 TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, processingDest[rootB][arg1], amountB, new_payload);
@@ -470,7 +483,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     tvm.rawReserve(address(this).balance - msg.value, 2);
     if (msg.sender == rootAB) {
       TvmSlice slice = payload.toSlice();
-      (uint8 arg0, address arg1, address arg2) = slice.decode(uint8, address, address);
+      (uint8 arg0, address arg1, address arg2, uint128 arg3, uint128 arg4) = slice.decode(uint8, address, address, uint128, uint128);
       if (counterCallback > 10) {
         Callback cc = callbacks[counterCallback];
         cc.token_wallet = wallet_address;
@@ -484,6 +497,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
         cc.payload_arg0 = arg0;
         cc.payload_arg1 = arg1;
         cc.payload_arg2 = arg2;
+        cc.payload_arg3 = arg3;
+        cc.payload_arg4 = arg4;
         callbacks[counterCallback] = cc;
         counterCallback++;
         delete callbacks[getFirstCallback()];
@@ -495,7 +510,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
             balanceReserve[rootA] -= returnA;
             balanceReserve[rootB] -= returnB;
             TvmBuilder builder;
-            builder.store(uint8(6), address(0), address(0));
+            builder.store(uint8(6), address(0), address(0), uint128(6), uint128(6));
             TvmCell new_payload = builder.toCell();
             TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, arg1, returnA, new_payload);
             TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, arg2, returnB, new_payload);
@@ -518,6 +533,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
         cc.payload_arg0 = arg0;
         cc.payload_arg1 = arg1;
         cc.payload_arg2 = arg2;
+        cc.payload_arg3 = arg3;
+        cc.payload_arg4 = arg4;
         callbacks[counterCallback] = cc;
         counterCallback++;
         if (arg0 == 3 && arg1 != address(0) && arg2 != address(0)) {
@@ -528,7 +545,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
             balanceReserve[rootA] -= returnA;
             balanceReserve[rootB] -= returnB;
             TvmBuilder builder;
-            builder.store(uint8(6), address(0), address(0));
+            builder.store(uint8(6), address(0), address(0), uint128(6), uint128(6));
             TvmCell new_payload = builder.toCell();
             TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, arg1, returnA, new_payload);
             TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, arg2, returnB, new_payload);
@@ -542,7 +559,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     }
   }
 
-  function getCallback(uint id) public view returns (
+  // Function for get callback
+  function getCallback(uint id) public view checkOwnerAndAccept returns (
     address token_wallet,
     address token_root,
     uint128 amount,
@@ -553,7 +571,9 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     uint128 updated_balance,
     uint8 payload_arg0,
     address payload_arg1,
-    address payload_arg2
+    address payload_arg2,
+    uint128 payload_arg3,
+    uint128 payload_arg4
   ){
     Callback cc = callbacks[id];
     token_wallet = cc.token_wallet;
@@ -567,6 +587,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
     payload_arg0 = cc.payload_arg0;
     payload_arg1 = cc.payload_arg1;
     payload_arg2 = cc.payload_arg2;
+    payload_arg3 = cc.payload_arg3;
+    payload_arg4 = cc.payload_arg4;
   }
 
   // Function for get this TON gramms balance
