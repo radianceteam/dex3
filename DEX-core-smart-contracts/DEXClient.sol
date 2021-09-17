@@ -460,6 +460,33 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect, ILockSta
     addrFrom; addrTo;
   }
 
+  // Function to receive processLiquidity callbacks from DEXpair.
+  function processLiquidityCallback(
+    address walletA,
+    uint128 amountA,
+    uint128 provideA,
+    uint128 unusedReturnA,
+    address walletB,
+    uint128 amountB,
+    uint128 provideB,
+    uint128 unusedReturnB,
+    address walletAB,
+    uint128 mintAB
+  )  public override checkPairAndAccept {
+    walletA; amountA;  provideA; unusedReturnA; walletB; amountB; provideB; unusedReturnB; walletAB; mintAB;
+  }
+
+  // Function to receive returnLiquidity callbacks from DEXpair.
+  function returnLiquidityCallback(
+    address walletAB,
+    uint128 burnAB,
+    address walletA,
+    uint128 returnA,
+    address walletB,
+    uint128 returnB)  public override checkPairAndAccept {
+    walletAB; burnAB; walletA; returnA; walletB; returnB;
+  }
+
   // Function to receive plain transfers.
   receive() external {
   }

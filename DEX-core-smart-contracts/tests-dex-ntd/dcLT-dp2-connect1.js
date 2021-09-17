@@ -55,7 +55,7 @@ async function main(client) {
   let resultArr = JSON.parse(fs.readFileSync(pathJsonClient,{encoding: "utf8"}));
   const pairAddr = JSON.parse(fs.readFileSync(currentPairPath,{encoding: "utf8"})).address;
 
-  resultArr = resultArr.splice(1, 9);
+  // resultArr = resultArr.splice(0, 1);
 
 
   for (const item of resultArr) {

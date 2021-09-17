@@ -298,7 +298,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
               TvmCell body = tvm.encodeBody(IRootTokenContract(rootAB).mint, liquidity, arg2);
               rootAB.transfer({value: GRAMS_MINT, bounce:true, body:body});
               cleanProcessing(arg1);
-              arg1.transfer({ value: 0, flag: 128});
+              TvmCell callbackBody = tvm.encodeBody(IDEXClient(arg1).processLiquidityCallback,processingDest[rootA][arg1],amountA,amountA,0,processingDest[rootB][arg1],amountB,amountB,0,arg2,liquidity);
+              arg1.transfer({ value: 0, flag: 128, body:callbackBody});
             } else {
               (uint128 provideA, uint128 provideB) = acceptForProvide(amountA, amountB);
               if (provideA > 0 && provideB > 0) {
@@ -310,6 +311,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                 totalSupply += liquidity;
                 TvmCell body = tvm.encodeBody(IRootTokenContract(rootAB).mint, liquidity, arg2);
                 rootAB.transfer({value: GRAMS_MINT, bounce:true, body:body});
+                TvmCell callbackBody = tvm.encodeBody(IDEXClient(arg1).processLiquidityCallback,processingDest[rootA][arg1],amountA,provideA,unusedReturnA,processingDest[rootB][arg1],amountB,provideB,unusedReturnB,arg2,liquidity);
                 if (unusedReturnA > 0 && unusedReturnB > 0) {
                   TvmBuilder builder;
                   builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
@@ -319,7 +321,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   rootConnector[rootA].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyA});
                   rootConnector[rootB].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyB});
                   cleanProcessing(arg1);
-                  arg1.transfer({ value: 0, flag: 128});
+                  arg1.transfer({ value: 0, flag: 128, body:callbackBody});
                 } else if (unusedReturnA > 0) {
                   TvmBuilder builder;
                   builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
@@ -327,7 +329,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, processingDest[rootA][arg1], unusedReturnA, new_payload);
                   rootConnector[rootA].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyA});
                   cleanProcessing(arg1);
-                  arg1.transfer({ value: 0, flag: 128});
+                  arg1.transfer({ value: 0, flag: 128, body:callbackBody});
                 } else if (unusedReturnB > 0) {
                   TvmBuilder builder;
                   builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
@@ -335,10 +337,10 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, processingDest[rootB][arg1], unusedReturnB, new_payload);
                   rootConnector[rootB].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyB});
                   cleanProcessing(arg1);
-                  arg1.transfer({ value: 0, flag: 128});
+                  arg1.transfer({ value: 0, flag: 128, body:callbackBody});
                 } else {
                   cleanProcessing(arg1);
-                  arg1.transfer({ value: 0, flag: 128});
+                  arg1.transfer({ value: 0, flag: 128, body:callbackBody});
                 }
               } else {
                 TvmBuilder builder;
@@ -349,7 +351,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                 rootConnector[rootA].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyA});
                 rootConnector[rootB].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyB});
                 cleanProcessing(arg1);
-                arg1.transfer({ value: 0, flag: 128});
+                TvmCell callbackBody = tvm.encodeBody(IDEXClient(arg1).processLiquidityCallback,processingDest[rootA][arg1],amountA,0,amountA,processingDest[rootB][arg1],amountB,0,amountB,arg2,0);
+                arg1.transfer({ value: 0, flag: 128, body:callbackBody});
               }
             }
           } else {
@@ -410,7 +413,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
               TvmCell body = tvm.encodeBody(IRootTokenContract(rootAB).mint, liquidity, arg2);
               rootAB.transfer({value: GRAMS_MINT, bounce:true, body:body});
               cleanProcessing(arg1);
-              arg1.transfer({ value: 0, flag: 128});
+              TvmCell callbackBody = tvm.encodeBody(IDEXClient(arg1).processLiquidityCallback,processingDest[rootA][arg1],amountA,amountA,0,processingDest[rootB][arg1],amountB,amountB,0,arg2,liquidity);
+              arg1.transfer({ value: 0, flag: 128, body:callbackBody});
             } else {
               (uint128 provideA, uint128 provideB) = acceptForProvide(amountA, amountB);
               if (provideA > 0 && provideB > 0) {
@@ -422,6 +426,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                 totalSupply += liquidity;
                 TvmCell body = tvm.encodeBody(IRootTokenContract(rootAB).mint, liquidity, arg2);
                 rootAB.transfer({value: GRAMS_MINT, bounce:true, body:body});
+                TvmCell callbackBody = tvm.encodeBody(IDEXClient(arg1).processLiquidityCallback,processingDest[rootA][arg1],amountA,provideA,unusedReturnA,processingDest[rootB][arg1],amountB,provideB,unusedReturnB,arg2,liquidity);
                 if (unusedReturnA > 0 && unusedReturnB > 0) {
                   TvmBuilder builder;
                   builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
@@ -431,7 +436,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   rootConnector[rootA].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyA});
                   rootConnector[rootB].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyB});
                   cleanProcessing(arg1);
-                  arg1.transfer({ value: 0, flag: 128});
+                  arg1.transfer({ value: 0, flag: 128, body:callbackBody});
                 } else if (unusedReturnA > 0) {
                   TvmBuilder builder;
                   builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
@@ -439,7 +444,7 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   TvmCell bodyA = tvm.encodeBody(IDEXConnector(rootConnector[rootA]).transfer, processingDest[rootA][arg1], unusedReturnA, new_payload);
                   rootConnector[rootA].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyA});
                   cleanProcessing(arg1);
-                  arg1.transfer({ value: 0, flag: 128});
+                  arg1.transfer({ value: 0, flag: 128, body:callbackBody});
                 } else if (unusedReturnB > 0) {
                   TvmBuilder builder;
                   builder.store(uint8(7), address(0), address(0), uint128(7), uint128(7));
@@ -447,10 +452,10 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                   TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, processingDest[rootB][arg1], unusedReturnB, new_payload);
                   rootConnector[rootB].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyB});
                   cleanProcessing(arg1);
-                  arg1.transfer({ value: 0, flag: 128});
+                  arg1.transfer({ value: 0, flag: 128, body:callbackBody});
                 } else {
                   cleanProcessing(arg1);
-                  arg1.transfer({ value: 0, flag: 128});
+                  arg1.transfer({ value: 0, flag: 128, body:callbackBody});
                 }
               } else {
                 TvmBuilder builder;
@@ -461,7 +466,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
                 rootConnector[rootA].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyA});
                 rootConnector[rootB].transfer({value: GRAMS_SEND_UNUSED_RETURN, bounce:true, body:bodyB});
                 cleanProcessing(arg1);
-                arg1.transfer({ value: 0, flag: 128});
+                TvmCell callbackBody = tvm.encodeBody(IDEXClient(arg1).processLiquidityCallback,processingDest[rootA][arg1],amountA,0,amountA,processingDest[rootB][arg1],amountB,0,amountB,arg2,0);
+                arg1.transfer({ value: 0, flag: 128, body:callbackBody});
               }
             }
           } else {
@@ -516,8 +522,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
             TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, arg2, returnB, new_payload);
             rootConnector[rootA].transfer({value: GRAMS_RETURN, bounce:true, body:bodyA});
             rootConnector[rootB].transfer({value: GRAMS_RETURN, bounce:true, body:bodyB});
-            if (counterCallback > 10){delete callbacks[getFirstCallback()];}
-            send_gas_to.transfer({value: 0, bounce:true, flag: 128});
+            TvmCell callbackBody = tvm.encodeBody(IDEXClient(send_gas_to).returnLiquidityCallback,wallet_address,tokens,arg1,returnA,arg2,returnB);
+            send_gas_to.transfer({value: 0, bounce:true, flag: 128, body:callbackBody});
           }
         }
       } else {
@@ -551,8 +557,8 @@ contract DEXPair is IDEXPair, IDEXConnect, ITokensReceivedCallback, IBurnTokensC
             TvmCell bodyB = tvm.encodeBody(IDEXConnector(rootConnector[rootB]).transfer, arg2, returnB, new_payload);
             rootConnector[rootA].transfer({value: GRAMS_RETURN, bounce:true, body:bodyA});
             rootConnector[rootB].transfer({value: GRAMS_RETURN, bounce:true, body:bodyB});
-            if (counterCallback > 10){delete callbacks[getFirstCallback()];}
-            send_gas_to.transfer({value: 0, bounce:true, flag: 128});
+            TvmCell callbackBody = tvm.encodeBody(IDEXClient(send_gas_to).returnLiquidityCallback,wallet_address,tokens,arg1,returnA,arg2,returnB);
+            send_gas_to.transfer({value: 0, bounce:true, flag: 128, body:callbackBody});
           }
         }
       }

@@ -68,7 +68,7 @@ async function main(client) {
         const giverNTDAddress = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).address;;
         const giverNTDKeys = JSON.parse(fs.readFileSync('./GiverContractNTD.json',{encoding: "utf8"})).keys;
         const giverNTDAcc = new Account(GiverContract, {address: giverNTDAddress,signer: giverNTDKeys,client,});
-        response = await giverNTDAcc.run("sendTransaction", {dest:address,value:10_000_000_000,bounce:false});
+        response = await giverNTDAcc.run("sendTransaction", {dest:address,value:20_000_000_000,bounce:false});
         console.log("Giver send 10 ton to address:", address, response.decoded.output);
       } else if (networkSelector == 2){
         console.log('Pls set giver for main.ton.dev');
@@ -76,13 +76,13 @@ async function main(client) {
         const giverRTDAddress = JSON.parse(fs.readFileSync('./GiverContractRTD.json',{encoding: "utf8"})).address;;
         const giverRTDKeys = JSON.parse(fs.readFileSync('./GiverContractRTD.json',{encoding: "utf8"})).keys;
         const giverRTDAcc = new Account(GiverContract, {address: giverRTDAddress,signer: giverRTDKeys,client,});
-        response = await giverRTDAcc.run("sendTransaction", {dest:address,value:10_000_000_000,bounce:false});
+        response = await giverRTDAcc.run("sendTransaction", {dest:address,value:20_000_000_000,bounce:false});
         console.log("Giver send 10 ton to address:", address, response.decoded.output);
       } else if (networkSelector == 4){
         const giverFLDAddress = JSON.parse(fs.readFileSync('./GiverContractFLD.json',{encoding: "utf8"})).address;;
         const giverFLDKeys = JSON.parse(fs.readFileSync('./GiverContractFLD.json',{encoding: "utf8"})).keys;
         const giverFLDAcc = new Account(GiverContract, {address: giverFLDAddress,signer: giverFLDKeys,client,});
-        response = await giverFLDAcc.run("sendTransaction", {dest:address,value:10_000_000_000,bounce:false});
+        response = await giverFLDAcc.run("sendTransaction", {dest:address,value:20_000_000_000,bounce:false});
         console.log("Giver send 10 ton to address:", address, response.decoded.output);
       } else {console.log('networkSelector is incorrect');}
 
