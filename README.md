@@ -37,12 +37,12 @@ https://docs.google.com/drawings/d/176G8UEKKl_HBiC55Fq_2GYG0pdHdxxJrvAhbCLuFzhM/
   * wETH https://net.ton.live/accounts/accountDetails?id=0%3A0983f2ffb833c55a09f148843d1586af4303e469079a48626ba0b98fda422d3b
 
 - DEXRoot.sol
-  * https://net.ton.live/accounts/accountDetails?id=0%3Aea01eb111ca5f76586d1d9c118cad84eedbda54fcc9a52e3bced8223885015a6
+  * https://net.ton.live/accounts/accountDetails?id=0%3Aeaaaffaa24457d6088fca0732cf00172cd854e9ca26d42434ded9ada297dfa62
 
 - DEXPair.sol
-  * wTON-wUSDT https://net.ton.live/accounts/accountDetails?id=0%3Aeb767854fa782e12d942addfcbf86564310e00f90e8b2c609f87cead2794814f
-  * wTON-wBTC https://net.ton.live/accounts/accountDetails?id=0%3Ae5a9837c44efc99130cc51887f89e21081781a44f3d0beb9d714815397e69dc5
-  * wTON-wETH https://net.ton.live/accounts/accountDetails?id=0%3Aea6f458a51404afa476e1cce1e4fb562dfec71eb6b8de9610adc395219a8f98f
+  * wTON-wUSDT https://net.ton.live/accounts/accountDetails?id=0%3Aea6eb680edde63e39b1053c415c8e31e3d998b0fc7af0132e5130c8841b33327
+  * wTON-wBTC https://net.ton.live/accounts/accountDetails?id=0%3Aeb780b9173cd7b8551b7a375e981d7cfad54f0ef29af4b0ea6a569106b03d193
+  * wTON-wETH https://net.ton.live/accounts/accountDetails?id=0%3Ae7c18018720b9a612017bee9894444eae154f8b489856b414ef508f3c45c9b27
 
 ## DEX-core-smart-contracts tests
 
