@@ -1,0 +1,87 @@
+{
+	"ABI version": 2,
+	"header": ["time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+				{"name":"codeIndex","type":"cell"},
+				{"name":"codeOrder","type":"cell"},
+				{"name":"codeRouter","type":"cell"},
+				{"name":"rootArr","type":"address[]"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "deployRouterCallback",
+			"inputs": [
+				{"name":"router","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "connectRouterToRoot",
+			"inputs": [
+				{"name":"root","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "createOrder",
+			"inputs": [
+				{"name":"addrOwner","type":"address"},
+				{"name":"addrPair","type":"address"},
+				{"name":"directionPair","type":"uint8"},
+				{"name":"price","type":"uint128"},
+				{"name":"amount","type":"uint128"},
+				{"name":"walletOwner","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "resolveCodeHashIndex",
+			"inputs": [
+				{"name":"addrRoot","type":"address"},
+				{"name":"addrOwner","type":"address"},
+				{"name":"addrPair","type":"address"},
+				{"name":"directionPair","type":"uint8"},
+				{"name":"price","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"codeHashIndex","type":"uint256"}
+			]
+		},
+		{
+			"name": "resolveCodeHash",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"codeHash","type":"uint256"}
+			]
+		},
+		{
+			"name": "_deployedAddress",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"_deployedAddress","type":"address"}
+			]
+		},
+		{
+			"name": "_deployedRouter",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"_deployedRouter","type":"address"}
+			]
+		}
+	],
+	"data": [
+	],
+	"events": [
+	]
+}

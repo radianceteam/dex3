@@ -272,6 +272,30 @@
 			]
 		},
 		{
+			"name": "makeLimitOrderA",
+			"inputs": [
+				{"name":"routerWalletA","type":"address"},
+				{"name":"pairAddr","type":"address"},
+				{"name":"qtyA","type":"uint128"},
+				{"name":"priceA","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"makeLimitOrderStatus","type":"bool"}
+			]
+		},
+		{
+			"name": "makeLimitOrderB",
+			"inputs": [
+				{"name":"routerWalletB","type":"address"},
+				{"name":"pairAddr","type":"address"},
+				{"name":"qtyB","type":"uint128"},
+				{"name":"priceB","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"makeLimitOrderStatus","type":"bool"}
+			]
+		},
+		{
 			"name": "rootDEX",
 			"inputs": [
 			],
@@ -365,6 +389,22 @@
 			],
 			"outputs": [
 				{"name":"pairKeys","type":"address[]"}
+			]
+		},
+		{
+			"name": "pl",
+			"inputs": [
+			],
+			"outputs": [
+				{"components":[{"name":"walletA","type":"address"},{"name":"amountA","type":"uint128"},{"name":"provideA","type":"uint128"},{"name":"unusedReturnA","type":"uint128"},{"name":"walletB","type":"address"},{"name":"amountB","type":"uint128"},{"name":"provideB","type":"uint128"},{"name":"unusedReturnB","type":"uint128"},{"name":"walletAB","type":"address"},{"name":"mintAB","type":"uint128"}],"name":"pl","type":"tuple"}
+			]
+		},
+		{
+			"name": "rl",
+			"inputs": [
+			],
+			"outputs": [
+				{"components":[{"name":"walletAB","type":"address"},{"name":"burnAB","type":"uint128"},{"name":"walletA","type":"address"},{"name":"returnA","type":"uint128"},{"name":"walletB","type":"address"},{"name":"returnB","type":"uint128"}],"name":"rl","type":"tuple"}
 			]
 		}
 	],

@@ -460,6 +460,34 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect, ILockSta
     addrFrom; addrTo;
   }
 
+  // Callback structure.
+  struct ProcessLiquidity {
+    address walletA;
+    uint128 amountA;
+    uint128 provideA;
+    uint128 unusedReturnA;
+    address walletB;
+    uint128 amountB;
+    uint128 provideB;
+    uint128 unusedReturnB;
+    address walletAB;
+    uint128 mintAB;
+  }
+
+  ProcessLiquidity public pl;
+
+  // Callback structure.
+  struct ReturnLiquidity {
+    address walletAB;
+    uint128 burnAB;
+    address walletA;
+    uint128 returnA;
+    address walletB;
+    uint128 returnB;
+  }
+
+  ReturnLiquidity public rl;
+
   // Function to receive processLiquidity callbacks from DEXpair.
   function processLiquidityCallback(
     address walletA,
@@ -473,7 +501,7 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect, ILockSta
     address walletAB,
     uint128 mintAB
   )  public override checkPairAndAccept {
-    walletA; amountA;  provideA; unusedReturnA; walletB; amountB; provideB; unusedReturnB; walletAB; mintAB;
+    pl = ProcessLiquidity(walletA, amountA,  provideA, unusedReturnA, walletB, amountB, provideB, unusedReturnB, walletAB, mintAB);
   }
 
   // Function to receive returnLiquidity callbacks from DEXpair.
@@ -483,8 +511,41 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect, ILockSta
     address walletA,
     uint128 returnA,
     address walletB,
-    uint128 returnB)  public override checkPairAndAccept {
-    walletAB; burnAB; walletA; returnA; walletB; returnB;
+    uint128 returnB
+  )  public override checkPairAndAccept {
+    rl = ReturnLiquidity(walletAB, burnAB, walletA, returnA, walletB, returnB);
+  }
+
+  // Function to makeLimitOrderA
+  function makeLimitOrderA(address routerWalletA, address pairAddr, uint128 qtyA, uint128 priceA) public view checkOwnerAndAccept returns (bool makeLimitOrderStatus) {
+    require (address(this).balance >= GRAMS_SWAP, 112);
+    makeLimitOrderStatus = false;
+    if (isReady(pairAddr)) {
+      Pair cp = pairs[pairAddr];
+      address connector = rootConnector[cp.rootA];
+      TvmBuilder builder;
+      builder.store(uint8(4), pairAddr, rootWallet[cp.rootB], priceA, qtyA);
+      TvmCell payload = builder.toCell();
+      TvmCell body = tvm.encodeBody(IDEXConnector(connector).transfer, routerWalletA, qtyA, payload);
+      connector.transfer({value: GRAMS_SWAP, bounce:true, body:body});
+      makeLimitOrderStatus = true;
+    }
+  }
+
+  // Function to makeLimitOrderB
+  function makeLimitOrderB(address routerWalletB, address pairAddr, uint128 qtyB, uint128 priceB) public view checkOwnerAndAccept returns (bool makeLimitOrderStatus) {
+    require (address(this).balance >= GRAMS_SWAP, 112);
+    makeLimitOrderStatus = false;
+    if (isReady(pairAddr)) {
+      Pair cp = pairs[pairAddr];
+      address connector = rootConnector[cp.rootB];
+      TvmBuilder builder;
+      builder.store(uint8(5), pairAddr, rootWallet[cp.rootA], priceB, qtyB);
+      TvmCell payload = builder.toCell();
+      TvmCell body = tvm.encodeBody(IDEXConnector(connector).transfer, routerWalletB, qtyB, payload);
+      connector.transfer({value: GRAMS_SWAP, bounce:true, body:body});
+      makeLimitOrderStatus = true;
+    }
   }
 
   // Function to receive plain transfers.

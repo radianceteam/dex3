@@ -2,9 +2,7 @@ const {TonClient, abiContract, signerKeys} = require("@tonclient/core");
 const { libNode } = require("@tonclient/lib-node");
 const { Account } = require("@tonclient/appkit");
 const { DEXRootContract } = require("./DEXRoot.js");
-const { DEXRootCode } = require("./DEXRootCode.js");
-const { GiverContract } = require("./GiverContract.js");
-const { GiverContractNTD } = require("./GiverContract.js");
+const { DEXClientContract } = require("./DEXClient.js");
 const fs = require('fs');
 const dotenv = require('dotenv').config();
 const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev'];
@@ -40,12 +38,12 @@ async function main(client) {
 // console.log("Contract reacted to your setDEXconnectorCode:", response.decoded.output);
 //
 // Call `setDEXclientCode` function
-response = await rootAcc.run("setDEXclientCode", {code:DEXRootCode.client});
+response = await rootAcc.run("setDEXclientCode", {code:DEXClientContract.code});
 console.log("Contract reacted to your setDEXclientCode:", response.decoded.output);
 
 // Call `setDEXpairCode` function
-response = await rootAcc.run("setDEXpairCode", {code:DEXRootCode.pair});
-console.log("Contract reacted to your setDEXpairCode:", response.decoded.output);
+// response = await rootAcc.run("setDEXpairCode", {code:DEXRootCode.pair});
+// console.log("Contract reacted to your setDEXpairCode:", response.decoded.output);
 
 // // Call `setRootTokenCode` function
 // response = await rootAcc.run("setRootTokenCode", {code:DEXRootCode.root});

@@ -58,6 +58,7 @@ async function main(client) {
   const rootAddrAB = response.decoded.output.rootAB;
 
   let clientCount = 0;
+  // resultArr.splice(1, 9);
   for (const item of resultArr) {
     // const item = resultArr[0];
     console.log("======DEX client count:", clientCount);
@@ -81,6 +82,13 @@ async function main(client) {
 
     response = await clientAcc.runLocal("getBalance", {_answer_id:0});
     console.log(" TON balance:", response.decoded.output);
+
+    // response = await clientAcc.runLocal("pl", {});
+    // console.log(" processLiquidityCallback:", response.decoded.output);
+    //
+    // response = await clientAcc.runLocal("rl", {});
+    // console.log(" returnLiquidityCallback:", response.decoded.output);
+
 
     clientCount++;
   }
