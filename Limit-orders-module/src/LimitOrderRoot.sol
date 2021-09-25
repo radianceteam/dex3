@@ -5,7 +5,6 @@ pragma AbiHeader time;
 
 import './resolvers/IndexResolver.sol';
 import './resolvers/LimitOrderResolver.sol';
-import './resolvers/LimitOrderResolver.sol';
 import './LimitOrderRouter.sol';
 
 import './interfaces/ILimitOrder.sol';
@@ -64,14 +63,43 @@ contract LimitOrderRoot is LimitOrderResolver, IndexResolver, ILimitOrderRoot {
     uint8 directionPair,
     uint128 price,
     uint128 amount,
-    address walletOwner
+    address walletOwnerRoot,
+    address walletOwnerFrom,
+    address walletOwnerTo
   ) public override {
     tvm.rawReserve(address(this).balance - msg.value, 2);
     require(msg.sender == _deployedRouter, 104);
     TvmCell codeOrder = _buildOrderCode(address(this));
     TvmCell stateOrder = _buildOrderState(codeOrder, _deployedNumber);
-    new LimitOrder{stateInit: stateOrder, value: 1.3 ton}(_codeIndex, addrOwner, addrPair, directionPair, price, amount, walletOwner);
+    new LimitOrder{stateInit: stateOrder, value: Constants.FOR_DEPLOY_ORDER}(
+      _codeIndex,
+      _deployedRouter,
+      addrOwner,
+      addrPair,
+      directionPair,
+      price,
+      amount,
+      walletOwnerRoot,
+      walletOwnerFrom,
+      walletOwnerTo
+    );
     _deployedNumber++;
     addrOwner.transfer({value: 0, bounce:true, flag: 128});
+  }
+
+  function cancelOrder(
+    uint256 id,
+    uint128 amount,
+    address walletOwnerRoot,
+    address walletOwnerFrom
+  ) public override {
+    address addrData = resolveOrder(id);
+    require(msg.sender == addrData);
+    ILimitOrderRouter(_deployedRouter).cancelOrder{value: 0, flag: 64}(
+      addrData,
+      amount,
+      walletOwnerRoot,
+      walletOwnerFrom
+    );
   }
 }

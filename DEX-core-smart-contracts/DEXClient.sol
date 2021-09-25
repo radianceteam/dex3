@@ -13,6 +13,8 @@ import "./interfaces/IDEXClient.sol";
 import "./interfaces/IDEXPair.sol";
 import "./interfaces/IDEXRoot.sol";
 import "./interfaces/ILockStakeSafeCallback.sol";
+import "./interfaces/ILimitOrder.sol";
+
 
 contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect, ILockStakeSafeCallback {
 
@@ -545,6 +547,65 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect, ILockSta
       TvmCell body = tvm.encodeBody(IDEXConnector(connector).transfer, routerWalletB, qtyB, payload);
       connector.transfer({value: GRAMS_SWAP, bounce:true, body:body});
       makeLimitOrderStatus = true;
+    }
+  }
+
+  // Function to transferLimitOrder
+  function transferLimitOrder(address limitOrder, address addrNewOwner, address walletNewOwnerFrom, address walletNewOwnerTo) public view checkOwnerAndAccept returns (bool transferLimitOrderStatus) {
+    require (address(this).balance >= GRAMS_SWAP, 112);
+    transferLimitOrderStatus = false;
+    TvmCell body = tvm.encodeBody(ILimitOrder(limitOrder).transferOwnership, addrNewOwner, walletNewOwnerFrom, walletNewOwnerTo);
+    limitOrder.transfer({value: GRAMS_SWAP, bounce:true, body:body});
+    transferLimitOrderStatus = true;
+  }
+
+  // Function to changePrice
+  function changeLimitOrderPrice(address limitOrder, uint128 newPrice) public view checkOwnerAndAccept returns (bool changePriceStatus) {
+    require (address(this).balance >= GRAMS_SWAP, 112);
+    changePriceStatus = false;
+    TvmCell body = tvm.encodeBody(ILimitOrder(limitOrder).changePrice, newPrice);
+    limitOrder.transfer({value: GRAMS_SWAP, bounce:true, body:body});
+    changePriceStatus = true;
+  }
+
+  // Function to cancelOrder
+  function cancelLimitOrder(address limitOrder) public view checkOwnerAndAccept returns (bool cancelOrderStatus) {
+    require (address(this).balance >= GRAMS_SWAP, 112);
+    cancelOrderStatus = false;
+    TvmCell body = tvm.encodeBody(ILimitOrder(limitOrder).cancelOrder);
+    limitOrder.transfer({value: GRAMS_SWAP, bounce:true, body:body});
+    cancelOrderStatus = true;
+  }
+
+  // Function to takeLimitOrderA
+  function takeLimitOrderA(address pairAddr, address limitOrderA, address routerWalletB, uint128 qtyB, uint128 priceB) public view checkOwnerAndAccept returns (bool takeLimitOrderStatus) {
+    require (address(this).balance >= GRAMS_SWAP, 112);
+    takeLimitOrderStatus = false;
+    if (isReady(pairAddr)) {
+      Pair cp = pairs[pairAddr];
+      address connector = rootConnector[cp.rootB];
+      TvmBuilder builder;
+      builder.store(uint8(6), limitOrderA, rootWallet[cp.rootA], priceB, qtyB);
+      TvmCell payload = builder.toCell();
+      TvmCell body = tvm.encodeBody(IDEXConnector(connector).transfer, routerWalletB, qtyB, payload);
+      connector.transfer({value: GRAMS_SWAP, bounce:true, body:body});
+      takeLimitOrderStatus = true;
+    }
+  }
+
+  // Function to takeLimitOrderB
+  function takeLimitOrderB(address pairAddr, address limitOrderB, address routerWalletA, uint128 qtyA, uint128 priceA) public view checkOwnerAndAccept returns (bool takeLimitOrderStatus) {
+    require (address(this).balance >= GRAMS_SWAP, 112);
+    takeLimitOrderStatus = false;
+    if (isReady(pairAddr)) {
+      Pair cp = pairs[pairAddr];
+      address connector = rootConnector[cp.rootA];
+      TvmBuilder builder;
+      builder.store(uint8(7), limitOrderB, rootWallet[cp.rootB], priceA, qtyA);
+      TvmCell payload = builder.toCell();
+      TvmCell body = tvm.encodeBody(IDEXConnector(connector).transfer, routerWalletA, qtyA, payload);
+      connector.transfer({value: GRAMS_SWAP, bounce:true, body:body});
+      takeLimitOrderStatus = true;
     }
   }
 

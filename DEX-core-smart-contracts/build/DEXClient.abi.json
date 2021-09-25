@@ -296,6 +296,63 @@
 			]
 		},
 		{
+			"name": "transferLimitOrder",
+			"inputs": [
+				{"name":"limitOrder","type":"address"},
+				{"name":"addrNewOwner","type":"address"},
+				{"name":"walletNewOwnerFrom","type":"address"},
+				{"name":"walletNewOwnerTo","type":"address"}
+			],
+			"outputs": [
+				{"name":"transferLimitOrderStatus","type":"bool"}
+			]
+		},
+		{
+			"name": "changeLimitOrderPrice",
+			"inputs": [
+				{"name":"limitOrder","type":"address"},
+				{"name":"newPrice","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"changePriceStatus","type":"bool"}
+			]
+		},
+		{
+			"name": "cancelLimitOrder",
+			"inputs": [
+				{"name":"limitOrder","type":"address"}
+			],
+			"outputs": [
+				{"name":"cancelOrderStatus","type":"bool"}
+			]
+		},
+		{
+			"name": "takeLimitOrderA",
+			"inputs": [
+				{"name":"pairAddr","type":"address"},
+				{"name":"limitOrderA","type":"address"},
+				{"name":"routerWalletB","type":"address"},
+				{"name":"qtyB","type":"uint128"},
+				{"name":"priceB","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"takeLimitOrderStatus","type":"bool"}
+			]
+		},
+		{
+			"name": "takeLimitOrderB",
+			"inputs": [
+				{"name":"pairAddr","type":"address"},
+				{"name":"limitOrderB","type":"address"},
+				{"name":"routerWalletA","type":"address"},
+				{"name":"qtyA","type":"uint128"},
+				{"name":"priceA","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"takeLimitOrderStatus","type":"bool"}
+			]
+		},
+		{
 			"name": "rootDEX",
 			"inputs": [
 			],

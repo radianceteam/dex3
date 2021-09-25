@@ -10,6 +10,7 @@ import "./interfaces/ITokensReceivedCallback.sol";
 import './interfaces/ILimitOrderRoot.sol';
 import './interfaces/ILimitOrderRouter.sol';
 import './interfaces/IExpectedWalletAddressCallback.sol';
+import './interfaces/ILimitOrder.sol';
 
 import './libraries/Constants.sol';
 
@@ -39,6 +40,7 @@ contract LimitOrderRouter is ITokenWalletDeployedCallback, ITokensReceivedCallba
   }
 
   mapping (uint => Callback) public callbacks;
+  mapping (uint => Callback) public exchangeCallbacks;
 
   modifier checkRoot {
     require(msg.sender == rootLimitOrder, 101);
@@ -71,18 +73,77 @@ contract LimitOrderRouter is ITokenWalletDeployedCallback, ITokensReceivedCallba
     rootLimitOrder.transfer({value: 0, bounce:true, flag: 128});
   }
 
+  function applyOrder(
+    bool result,
+    uint idCallback,
+    uint128 amount,
+    address walletOwnerRoot,
+    address walletOwnerTo
+  ) public override {
+    require(exchangeCallbacks.exists(idCallback));
+    // arg1 = addrData; arg2 = addrWalletTakerTo; arg3 = price; arg4 = amount;
+    Callback cc = exchangeCallbacks[idCallback];
+    address addrData = cc.payload_arg1;
+    require(msg.sender == addrData);
+
+    tvm.rawReserve(address(this).balance - msg.value, 2);
+    TvmBuilder builder;
+    builder.store(uint8(0), msg.sender, address(this), uint128(0), uint128(0));
+    TvmCell new_payload = builder.toCell();
+
+    delete exchangeCallbacks[idCallback];
+    if (result == true) {
+      // check balance
+
+      // transfer walletOwnerTo from router wallet (cc.token_wallet) cc.amount
+      ITONTokenWallet(cc.token_wallet).transfer{value: Constants.FOR_RETURN_TOKEN, flag: 1}(walletOwnerTo, cc.amount, 0, cc.original_gas_to, true, new_payload);
+      balanceFor[cc.token_wallet] -= cc.amount;
+
+      // transfer cc.arg2 from router wallet [walletOwnerRoot] amount
+      address routerWallet = walletFor[walletOwnerRoot];
+      ITONTokenWallet(routerWallet).transfer{value: Constants.FOR_RETURN_TOKEN, flag: 1}(cc.payload_arg2, amount, 0, cc.original_gas_to, true, new_payload);
+      balanceFor[routerWallet] -= amount;
+
+      ILimitOrder(addrData).applyOrderCallback{value: 0, flag: 128}(result, amount, cc.original_gas_to);
+    } else {
+      // transfer cc.sender_wallet cc.amount
+      ITONTokenWallet(cc.token_wallet).transfer{value: Constants.FOR_RETURN_TOKEN, flag: 1}(cc.sender_wallet, cc.amount, 0, cc.original_gas_to, true, new_payload);
+      balanceFor[cc.token_wallet] -= cc.amount;
+      cc.original_gas_to.transfer({value: 0, flag: 128});
+    }
+  }
+
+  function cancelOrder(
+    address addrData,
+    uint128 amount,
+    address walletOwnerRoot,
+    address walletOwnerFrom
+  ) public override checkRoot {
+    require(walletFor.exists(walletOwnerRoot));
+    address walletRouter = walletFor[walletOwnerRoot];
+    require(balanceFor[walletRouter] >= amount);
+    tvm.rawReserve(address(this).balance - msg.value, 2);
+
+    TvmBuilder builder;
+    builder.store(uint8(0), addrData, walletRouter, uint128(0), uint128(0));
+    TvmCell new_payload = builder.toCell();
+    ITONTokenWallet(walletRouter).transfer{value: Constants.FOR_RETURN_TOKEN, flag: 1}(walletOwnerFrom, amount, 0, addrData, true, new_payload);
+    balanceFor[walletRouter] -= amount;
+    ILimitOrder(addrData).cancelOrderCallback{value: 0, flag: 128}();
+  }
+
   function notifyWalletDeployed(address root) public override {
     root;
   }
 
   function expectedWalletAddressCallback(address wallet, uint256 wallet_public_key, address owner_address) public override {
-  require(walletFor.exists(msg.sender) && wallet_public_key == 0 && owner_address == address(this), 103);
-  tvm.rawReserve(address(this).balance - msg.value, 2);
-  walletFor[msg.sender] = wallet;
-  balanceFor[wallet] = 0;
-  TvmCell body = tvm.encodeBody(ITONTokenWallet(wallet).setReceiveCallback, address(this), true);
-  wallet.transfer({value: 0.1 ton, bounce:true, flag: 0, body:body});
-}
+    require(walletFor.exists(msg.sender) && wallet_public_key == 0 && owner_address == address(this), 103);
+    tvm.rawReserve(address(this).balance - msg.value, 2);
+    walletFor[msg.sender] = wallet;
+    balanceFor[wallet] = 0;
+    TvmCell body = tvm.encodeBody(ITONTokenWallet(wallet).setReceiveCallback, address(this), true);
+    wallet.transfer({value: 0.1 ton, bounce:true, flag: 0, body:body});
+  }
 
   function getFirstCallback() private view returns (uint) {
     optional(uint, Callback) rc = callbacks.min();
@@ -119,17 +180,25 @@ contract LimitOrderRouter is ITokenWalletDeployedCallback, ITokensReceivedCallba
       cc.payload_arg3 = arg3;
       cc.payload_arg4 = arg4;
       callbacks[counterCallback] = cc;
+      uint idCallback = counterCallback;
       counterCallback++;
       if (counterCallback > 10) { delete callbacks[getFirstCallback()];}
       if (arg0 == 4) {
         balanceFor[token_wallet] += amount;
-        TvmCell body = tvm.encodeBody(ILimitOrderRoot(rootLimitOrder).createOrder,original_gas_to,arg1,uint8(4),arg3,amount,arg2);
+        TvmCell body = tvm.encodeBody(ILimitOrderRoot(rootLimitOrder).createOrder,original_gas_to,arg1,arg0,arg3,amount,token_root,sender_wallet,arg2);
         rootLimitOrder.transfer({value: 0, bounce: true, flag: 128, body:body});
       }
       if (arg0 == 5) {
         balanceFor[token_wallet] += amount;
-        TvmCell body = tvm.encodeBody(ILimitOrderRoot(rootLimitOrder).createOrder,original_gas_to,arg1,uint8(4),arg3,arg4,arg2);
+        TvmCell body = tvm.encodeBody(ILimitOrderRoot(rootLimitOrder).createOrder,original_gas_to,arg1,arg0,arg3,amount,token_root,sender_wallet,arg2);
         rootLimitOrder.transfer({value: 0, bounce: true, flag: 128, body:body});
+      }
+      if (arg0 == 6 || arg0 == 7) {
+        // arg1 = addrData; arg2 = addrWalletTakerTo; arg3 = price; arg4 = amount;
+        balanceFor[token_wallet] += amount;
+        exchangeCallbacks[idCallback] = cc;
+        TvmCell body = tvm.encodeBody(ILimitOrder(arg1).applyOrder,amount,arg3,idCallback);
+        arg1.transfer({value: 0, bounce: true, flag: 128, body:body});
       }
     }
   }

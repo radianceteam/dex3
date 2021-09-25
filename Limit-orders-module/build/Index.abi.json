@@ -1,12 +1,11 @@
 {
 	"ABI version": 2,
+	"version": "2.1",
 	"header": ["time", "expire"],
 	"functions": [
 		{
 			"name": "constructor",
 			"inputs": [
-				{"name":"owner","type":"address"},
-				{"name":"amount","type":"uint128"}
 			],
 			"outputs": [
 			]
@@ -16,10 +15,14 @@
 			"inputs": [
 			],
 			"outputs": [
-				{"name":"addrRoot","type":"address"},
-				{"name":"addrOwner","type":"address"},
-				{"name":"addrOrder","type":"address"},
-				{"name":"amount","type":"uint128"}
+				{"name":"addrOrder","type":"address"}
+			]
+		},
+		{
+			"name": "destruct",
+			"inputs": [
+			],
+			"outputs": [
 			]
 		}
 	],
@@ -27,5 +30,11 @@
 		{"key":1,"name":"_addrOrder","type":"address"}
 	],
 	"events": [
+	],
+	"fields": [
+		{"name":"_pubkey","type":"uint256"},
+		{"name":"_timestamp","type":"uint64"},
+		{"name":"_constructorFlag","type":"bool"},
+		{"name":"_addrOrder","type":"address"}
 	]
 }

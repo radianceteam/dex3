@@ -10,8 +10,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXClient.tvc | grep co
   let image = fs.readFileSync(`./build/DEXClient.tvc`, {encoding: "base64",});
   let code = fs.readFileSync(`./build/DEXClient.txt`, {encoding: "utf8",});
   code = code.substring(0, code.length - 1);
-  fs.writeFileSync(`./tests-dex-ntd/DEXClient.js`,`module.exports = {DEXClientContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
-  console.log(`create and writeFileSyn ./tests-dex-ntd/DEXClient.js`);
+  fs.writeFileSync(`./tests-dex-main/DEXClient.js`,`module.exports = {DEXClientContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-main/DEXClient.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXConnector.tvc | grep code: | cut -c 8- > ./build/DEXConnector.txt", (error, stdout, stderr) => {
@@ -23,8 +23,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXConnector.tvc | grep
   image = fs.readFileSync(`./build/DEXConnector.tvc`, {encoding: "base64",});
   code = fs.readFileSync(`./build/DEXConnector.txt`, {encoding: "utf8",});
   code = code.substring(0, code.length - 1);
-  fs.writeFileSync(`./tests-dex-ntd/DEXConnector.js`,`module.exports = {DEXConnectorContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
-  console.log(`create and writeFileSyn ./tests-dex-ntd/DEXConnector.js`);
+  fs.writeFileSync(`./tests-dex-main/DEXConnector.js`,`module.exports = {DEXConnectorContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-main/DEXConnector.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXPair.tvc | grep code: | cut -c 8- > ./build/DEXPair.txt", (error, stdout, stderr) => {
@@ -36,8 +36,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXPair.tvc | grep code
   image = fs.readFileSync(`./build/DEXPair.tvc`, {encoding: "base64",});
   code = fs.readFileSync(`./build/DEXPair.txt`, {encoding: "utf8",});
   code = code.substring(0, code.length - 1);
-  fs.writeFileSync(`./tests-dex-ntd/DEXPair.js`,`module.exports = {DEXPairContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
-  console.log(`create and writeFileSyn ./tests-dex-ntd/DEXPair.js`);
+  fs.writeFileSync(`./tests-dex-main/DEXPair.js`,`module.exports = {DEXPairContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-main/DEXPair.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXRoot.tvc | grep code: | cut -c 8- > ./build/DEXRoot.txt", (error, stdout, stderr) => {
@@ -49,8 +49,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXRoot.tvc | grep code
   image = fs.readFileSync(`./build/DEXRoot.tvc`, {encoding: "base64",});
   code = fs.readFileSync(`./build/DEXRoot.txt`, {encoding: "utf8",});
   code = code.substring(0, code.length - 1);
-  fs.writeFileSync(`./tests-dex-ntd/DEXRoot.js`,`module.exports = {DEXRootContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
-  console.log(`create and writeFileSyn ./tests-dex-ntd/DEXRoot.js`);
+  fs.writeFileSync(`./tests-dex-main/DEXRoot.js`,`module.exports = {DEXRootContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-main/DEXRoot.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/RootTokenContract.tvc | grep code: | cut -c 8- > ./build/RootTokenContract.txt", (error, stdout, stderr) => {
@@ -62,8 +62,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/RootTokenContract.tvc |
   image = fs.readFileSync(`./build/RootTokenContract.tvc`, {encoding: "base64",});
   code = fs.readFileSync(`./build/RootTokenContract.txt`, {encoding: "utf8",});
   code = code.substring(0, code.length - 1);
-  fs.writeFileSync(`./tests-dex-ntd/RootTokenContract.js`,`module.exports = {RootTokenContractContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
-  console.log(`create and writeFileSyn ./tests-dex-ntd/RootTokenContract.js`);
+  fs.writeFileSync(`./tests-dex-main/RootTokenContract.js`,`module.exports = {RootTokenContractContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-main/RootTokenContract.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/TONTokenWallet.tvc | grep code: | cut -c 8- > ./build/TONTokenWallet.txt", (error, stdout, stderr) => {
@@ -75,8 +75,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/TONTokenWallet.tvc | gr
   image = fs.readFileSync(`./build/TONTokenWallet.tvc`, {encoding: "base64",});
   code = fs.readFileSync(`./build/TONTokenWallet.txt`, {encoding: "utf8",});
   code = code.substring(0, code.length - 1);
-  fs.writeFileSync(`./tests-dex-ntd/TONTokenWallet.js`,`module.exports = {TONTokenWalletContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
-  console.log(`create and writeFileSyn ./tests-dex-ntd/TONTokenWallet.js`);
+  fs.writeFileSync(`./tests-dex-main/TONTokenWallet.js`,`module.exports = {TONTokenWalletContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-main/TONTokenWallet.js`);
 });
 
 // not work now

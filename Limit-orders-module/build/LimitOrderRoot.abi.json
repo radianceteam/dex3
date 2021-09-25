@@ -1,5 +1,6 @@
 {
 	"ABI version": 2,
+	"version": "2.1",
 	"header": ["time", "expire"],
 	"functions": [
 		{
@@ -37,7 +38,20 @@
 				{"name":"directionPair","type":"uint8"},
 				{"name":"price","type":"uint128"},
 				{"name":"amount","type":"uint128"},
-				{"name":"walletOwner","type":"address"}
+				{"name":"walletOwnerRoot","type":"address"},
+				{"name":"walletOwnerFrom","type":"address"},
+				{"name":"walletOwnerTo","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "cancelOrder",
+			"inputs": [
+				{"name":"id","type":"uint256"},
+				{"name":"amount","type":"uint128"},
+				{"name":"walletOwnerRoot","type":"address"},
+				{"name":"walletOwnerFrom","type":"address"}
 			],
 			"outputs": [
 			]
@@ -56,11 +70,34 @@
 			]
 		},
 		{
+			"name": "resolveIndex",
+			"inputs": [
+				{"name":"addrRoot","type":"address"},
+				{"name":"addrOwner","type":"address"},
+				{"name":"addrPair","type":"address"},
+				{"name":"directionPair","type":"uint8"},
+				{"name":"price","type":"uint128"},
+				{"name":"addrOrder","type":"address"}
+			],
+			"outputs": [
+				{"name":"addrIndex","type":"address"}
+			]
+		},
+		{
 			"name": "resolveCodeHash",
 			"inputs": [
 			],
 			"outputs": [
 				{"name":"codeHash","type":"uint256"}
+			]
+		},
+		{
+			"name": "resolveOrder",
+			"inputs": [
+				{"name":"id","type":"uint256"}
+			],
+			"outputs": [
+				{"name":"addrOrder","type":"address"}
 			]
 		},
 		{
@@ -83,5 +120,15 @@
 	"data": [
 	],
 	"events": [
+	],
+	"fields": [
+		{"name":"_pubkey","type":"uint256"},
+		{"name":"_timestamp","type":"uint64"},
+		{"name":"_constructorFlag","type":"bool"},
+		{"name":"_codeOrder","type":"cell"},
+		{"name":"_codeIndex","type":"cell"},
+		{"name":"_deployedNumber","type":"uint256"},
+		{"name":"_deployedAddress","type":"address"},
+		{"name":"_deployedRouter","type":"address"}
 	]
 }
