@@ -62,6 +62,8 @@ async function main(client) {
     console.log("checkAddress:", checkAddress);
 
     if (checkAddress) {
+
+
       if (networkSelector == 0) {
         const giver = await Account.getGiverForClient(client);
         await giver.sendTo(address, 100_000_000_000);

@@ -131,7 +131,7 @@ async function main2(client) {
   response = await clientAcc.runLocal("getBalance", {_answer_id:0});
   grammsAfter = response.decoded.output.value0;
   logger.log("client TON gramm balance after:", grammsAfter);
-  logger.log("swapB operation cost:", (grammsBefore-grammsAfter)/10**9);
+  logger.log("swapA operation cost:", (grammsBefore-grammsAfter)/10**9);
   return [deltaB,checkB];
 }
 

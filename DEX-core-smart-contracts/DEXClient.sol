@@ -97,12 +97,6 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect, ILockSta
     _;
   }
 
-  modifier checkWalletAndAccept {
-    require(rootWallet.exists(msg.sender), 104);
-    tvm.rawReserve(address(this).balance - msg.value, 2);
-    _;
-  }
-
   modifier checkPairAndAccept {
     require(pairs.exists(msg.sender), 108);
     tvm.rawReserve(address(this).balance - msg.value, 2);
@@ -323,7 +317,8 @@ contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect, ILockSta
     address original_gas_to,
     uint128 updated_balance,
     TvmCell payload
-  ) public override checkWalletAndAccept {
+  ) public override {
+    tvm.rawReserve(address(this).balance - msg.value, 2);
     Callback cc = callbacks[counterCallback];
     cc.token_wallet = token_wallet;
     cc.token_root = token_root;
