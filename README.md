@@ -21,13 +21,27 @@
  * https://github.com/radianceteam/defispace-front
 
 ## DEX-core-smart-contracts architecture with sharding optimization
-![DEX-core-smart-contracts-architecture](DEX-core-smart-contracts-architecture.png)
-https://docs.google.com/drawings/d/176G8UEKKl_HBiC55Fq_2GYG0pdHdxxJrvAhbCLuFzhM/edit?usp=sharing
+![DEX-core-smart-contracts-architecture](https://user-images.githubusercontent.com/12598254/134993988-8595c44d-571d-4837-9574-4ad0c9e38ed3.jpg)
+https://drive.google.com/file/d/1QfCY30uvazWHvqbWBDTOQcAFd7k_g9RD/view?usp=sharing
 
 ## DEX-core-smart-contracts gas flow schemes
- * swap https://docs.google.com/drawings/d/1sE0ZcyN8adgMlRZC6r6rqtR9Fyq3u4zj7X9kA0ll_bM/edit?usp=sharing
- * provide liquidity https://docs.google.com/drawings/d/1Cekvt35tKauEgWbGVz7-u0D6xJ6hhZux9-bmh0TBH-U/edit?usp=sharing
- * return liquidity https://docs.google.com/drawings/d/1_TZsYPI7mIat6N2wYxS8tSWqMOcsKc3ze1WxeXHZTv8/edit?usp=sharing
+ * swap 
+ ![SWAP-GAS](https://user-images.githubusercontent.com/12598254/134994429-f6b0bde0-c148-480f-89b1-e1fea7d98da4.jpg)
+  https://drive.google.com/file/d/1h6kc_-AXlDqwdMq7CPHBwTZZL9U5DBH2/view?usp=sharing
+ * provide liquidity 
+  ![LIQUID-PROV](https://user-images.githubusercontent.com/12598254/134994459-351a3c5c-7a45-443b-9cf8-15a0e5fcbcbd.jpg)
+  https://drive.google.com/file/d/1Rv7pejdHFlaekS7hrNkZMNwOL09p-ecb/view?usp=sharing
+ * return liquidity
+ ![LIQ-WITHDRW](https://user-images.githubusercontent.com/12598254/134994491-4336299a-24cf-4fc7-90ba-d67ca7d2800a.jpg)
+  https://drive.google.com/file/d/12Lo0zotoMmfQxaEW-t4LRHcXS3UGcWfd/view?usp=sharing
+
+## Limit orders diagrams
+ * Maker 
+ ![limitOrders3-maker](https://user-images.githubusercontent.com/12598254/134994564-a03edd63-f4c5-49c4-b926-af3dc5f6e1c7.jpg)
+ https://drive.google.com/file/d/1K-4rtYQGT_1-XMnBpvi5pR9a5TIXbd7s/view?usp=sharing
+ * Taker 
+ ![limitOrders3-taker](https://user-images.githubusercontent.com/12598254/134994575-18b22d69-0e35-47b5-a70e-24cc26c563d3.jpg)
+ https://drive.google.com/file/d/1xPOhv0BNXHayXwJRZS5thwWJFBq7DpK6/view?usp=sharing
 
 ## DEX-core-smart-contracts main.ton.dev implementation
 - RootTokenContract.sol
