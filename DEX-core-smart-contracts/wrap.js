@@ -12,6 +12,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXClient.tvc | grep co
   code = code.substring(0, code.length - 1);
   fs.writeFileSync(`./tests-dex-main/DEXClient.js`,`module.exports = {DEXClientContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
   console.log(`create and writeFileSyn ./tests-dex-main/DEXClient.js`);
+  fs.writeFileSync(`./tests-dex-ntd/DEXClient.js`,`module.exports = {DEXClientContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-ntd/DEXClient.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXConnector.tvc | grep code: | cut -c 8- > ./build/DEXConnector.txt", (error, stdout, stderr) => {
@@ -25,6 +27,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXConnector.tvc | grep
   code = code.substring(0, code.length - 1);
   fs.writeFileSync(`./tests-dex-main/DEXConnector.js`,`module.exports = {DEXConnectorContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
   console.log(`create and writeFileSyn ./tests-dex-main/DEXConnector.js`);
+  fs.writeFileSync(`./tests-dex-ntd/DEXConnector.js`,`module.exports = {DEXConnectorContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-ntd/DEXConnector.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXPair.tvc | grep code: | cut -c 8- > ./build/DEXPair.txt", (error, stdout, stderr) => {
@@ -38,6 +42,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXPair.tvc | grep code
   code = code.substring(0, code.length - 1);
   fs.writeFileSync(`./tests-dex-main/DEXPair.js`,`module.exports = {DEXPairContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
   console.log(`create and writeFileSyn ./tests-dex-main/DEXPair.js`);
+  fs.writeFileSync(`./tests-dex-ntd/DEXPair.js`,`module.exports = {DEXPairContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-ntd/DEXPair.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXRoot.tvc | grep code: | cut -c 8- > ./build/DEXRoot.txt", (error, stdout, stderr) => {
@@ -51,6 +57,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/DEXRoot.tvc | grep code
   code = code.substring(0, code.length - 1);
   fs.writeFileSync(`./tests-dex-main/DEXRoot.js`,`module.exports = {DEXRootContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
   console.log(`create and writeFileSyn ./tests-dex-main/DEXRoot.js`);
+  fs.writeFileSync(`./tests-dex-ntd/DEXRoot.js`,`module.exports = {DEXRootContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-ntd/DEXRoot.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/RootTokenContract.tvc | grep code: | cut -c 8- > ./build/RootTokenContract.txt", (error, stdout, stderr) => {
@@ -64,6 +72,8 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/RootTokenContract.tvc |
   code = code.substring(0, code.length - 1);
   fs.writeFileSync(`./tests-dex-main/RootTokenContract.js`,`module.exports = {RootTokenContractContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
   console.log(`create and writeFileSyn ./tests-dex-main/RootTokenContract.js`);
+  fs.writeFileSync(`./tests-dex-ntd/RootTokenContract.js`,`module.exports = {RootTokenContractContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-ntd/RootTokenContract.js`);
 });
 
 exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/TONTokenWallet.tvc | grep code: | cut -c 8- > ./build/TONTokenWallet.txt", (error, stdout, stderr) => {
@@ -77,13 +87,19 @@ exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/TONTokenWallet.tvc | gr
   code = code.substring(0, code.length - 1);
   fs.writeFileSync(`./tests-dex-main/TONTokenWallet.js`,`module.exports = {TONTokenWalletContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
   console.log(`create and writeFileSyn ./tests-dex-main/TONTokenWallet.js`);
+  fs.writeFileSync(`./tests-dex-ntd/TONTokenWallet.js`,`module.exports = {TONTokenWalletContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-ntd/TONTokenWallet.js`);
 });
 
-// not work now
-// tondev js wrap ./build/DEXClient.abi.json -o ../tests-dex-ntd/DEXClient.js &&
-// tondev js wrap ./build/DEXConnector.abi.json -o ../tests-dex-ntd/DEXConnector.js &&
-// tondev js wrap ./build/DEXPair.abi.json -o ../tests-dex-ntd/DEXPair.js &&
-// tondev js wrap ./build/DEXRoot.abi.json -o ../tests-dex-ntd/DEXRoot.js &&
-// tondev js wrap ./build/RootTokenContract.abi.json -o ../tests-dex-ntd/RootTokenContract.js &&
-// tondev js wrap ./build/TONTokenWallet.abi.json -o ../tests-dex-ntd/TONTokenWallet.js &&
-// tondev js wrap ./build/SetcodeMultisigWallet.abi.json -o ../tests-dex-ntd/SetcodeMultisigWallet.js
+exec("~/.tondev/solidity/tvm_linker decode --tvc ./build/SetcodeMultisigWallet.tvc | grep code: | cut -c 8- > ./build/SetcodeMultisigWallet.txt", (error, stdout, stderr) => {
+  if (error) {console.log(`error: ${error.message}`);return;}
+  if (stderr) {console.log(`stderr: ${stderr}`);return;}
+  console.log(`stdout tvm_linker decode SetcodeMultisigWallet.tvc: ${stdout}`);
+  abiRaw = fs.readFileSync(`./build/SetcodeMultisigWallet.abi.json`);
+  abi = JSON.parse(abiRaw);
+  image = fs.readFileSync(`./build/SetcodeMultisigWallet.tvc`, {encoding: "base64",});
+  code = fs.readFileSync(`./build/SetcodeMultisigWallet.txt`, {encoding: "utf8",});
+  code = code.substring(0, code.length - 1);
+  fs.writeFileSync(`./tests-dex-main/SetcodeMultisigWallet.js`,`module.exports = {SetcodeMultisigWalletContract:{abi:${JSON.stringify(abi)},tvc:${JSON.stringify(image)},code:${JSON.stringify(code)}}};`);
+  console.log(`create and writeFileSyn ./tests-dex-main/SetcodeMultisigWallet.js`);
+});

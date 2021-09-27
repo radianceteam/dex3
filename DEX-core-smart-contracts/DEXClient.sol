@@ -15,7 +15,6 @@ import "./interfaces/IDEXRoot.sol";
 import "./interfaces/ILockStakeSafeCallback.sol";
 import "./interfaces/ILimitOrder.sol";
 
-
 contract DEXClient is ITokensReceivedCallback, IDEXClient, IDEXConnect, ILockStakeSafeCallback {
 
   address static public rootDEX;

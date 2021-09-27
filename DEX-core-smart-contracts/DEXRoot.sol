@@ -7,17 +7,31 @@ import "./DEXClient.sol";
 import "./DEXPair.sol";
 import "./RootTokenContract.sol";
 import "./interfaces/IDEXRoot.sol";
+import "./interfaces/IDEXConnector.sol";
+import "./interfaces/IDEXConnect.sol";
 import "./interfaces/IRootTokenContract.sol";
+import "./interfaces/ITokensReceivedCallback.sol";
 
-contract DEXroot is IDEXRoot {
+contract DEXroot is IDEXRoot, IDEXConnect, ITokensReceivedCallback {
 
 	uint256 static public soUINT;
 
+	// pointers:
+	// codeDEXclient - 0;
+	// codeDEXpair - 1;
+	// codeDEXconnector - 2;
+	// codeRootToken - 3;
+	// codeTONTokenWallet - 4
 	TvmCell public codeDEXclient;
 	TvmCell public codeDEXpair;
 	TvmCell public codeDEXconnector;
 	TvmCell public codeRootToken;
 	TvmCell public codeTONTokenWallet;
+
+	address public rootDEX;
+	address public voteForWalletDEX;
+	address public voteAgainstWalletDEX;
+	uint8 public walletsCount;
 
 	mapping(address => mapping(address => address)) roots;
 
@@ -49,6 +63,29 @@ contract DEXroot is IDEXRoot {
 	mapping(address => uint128) public balanceOf;
 	mapping(address => string) public msgOf;
 
+	// Vote structure
+	struct Vote {
+		uint256 start;
+		uint256 duration;
+		TvmCell code;
+		uint8 pointer;
+		uint128 voteFor;
+		uint128 voteAgainst;
+		bool isVotingNow;
+	}
+
+	Vote public vote;
+	uint256 public voteCount;
+
+	struct Connector {
+		address root_address;
+		uint256 souint;
+		bool status;
+	}
+
+	mapping (address => Connector) public connectors;
+	mapping (address => address) public walletConnector;
+
 	// Grams constants
 	uint128 constant public GRAMS_CREATE_DEX_CLIENT = 1 ton;
 	uint128 constant public MIN_BALANCE = 1 ton;
@@ -62,14 +99,14 @@ contract DEXroot is IDEXRoot {
 	}
 
 	// Init function.
-	constructor() public {
-		require(tvm.pubkey() == msg.pubkey(), 102);
+	constructor(address _rootDEX, uint256 _souintFor, uint256 _souintAgainst, uint128 _gramsToConnector, uint128 _gramsToRoot, TvmCell _codeConnector) public {
+		require(tvm.pubkey() == msg.pubkey() && address(this).balance >= (_gramsToConnector + _gramsToRoot) * 2 + 1 ton && _souintFor != _souintAgainst, 102);
 		tvm.accept();
-	}
-
-	// Function to transfers plain transfers.
-	function sendTransfer(address dest, uint128 value, bool bounce) public pure checkOwnerAndAccept {
-		dest.transfer(value, bounce, 0);
+		rootDEX = _rootDEX;
+		codeDEXconnector = _codeConnector;
+		walletsCount = 0;
+		connectRoot(_rootDEX, _souintFor, _gramsToConnector, _gramsToRoot);
+		connectRoot(_rootDEX, _souintAgainst, _gramsToConnector, _gramsToRoot);
 	}
 
 	// Function to receive plain transfers.
@@ -373,11 +410,157 @@ contract DEXroot is IDEXRoot {
 	}
 
 	function computeCodeHash(TvmCell code) public view returns (uint256) {
-			return tvm.hash(code);
+		return tvm.hash(code);
 	}
 
 	function hashRootTokenContract() public view returns (uint256) {
-			return tvm.hash(codeRootToken);
+		return tvm.hash(codeRootToken);
+	}
+
+	// Function to send Transaction with setting bounce, flags and payload.
+	function sendTransaction(address dest, uint128 value, bool bounce, uint8 flags, TvmCell payload) public pure checkOwnerAndAccept {
+		dest.transfer(value, bounce, flags, payload);
+	}
+
+	// Function to connect DEX Root to TON Token Wallet of Root Token Contract.
+	function connectRoot(address root, uint256 souint, uint128 gramsToConnector, uint128 gramsToRoot) private inline {
+		TvmCell stateInit = tvm.buildStateInit({
+			contr: DEXConnector,
+			varInit: { soUINT: souint, dexclient: address(this) },
+			code: codeDEXconnector,
+			pubkey: tvm.pubkey()
+		});
+		TvmCell init = tvm.encodeBody(DEXConnector);
+		address connector = tvm.deploy(stateInit, init, gramsToConnector, address(this).wid);
+		Connector cr = connectors[connector];
+		cr.root_address = root;
+		cr.souint = souint;
+		cr.status = false;
+		connectors[connector] = cr;
+		TvmCell body = tvm.encodeBody(IDEXConnector(connector).deployEmptyWallet, root);
+		connector.transfer({value:gramsToRoot, bounce:true, body:body});
+	}
+
+	// Function to callbacks from DEX Connector about connected TON Token Wallet of Root Token Contract.
+	function connectCallback(address wallet) public override {
+		require(connectors.exists(msg.sender), 109);
+		tvm.rawReserve(address(this).balance - msg.value, 2);
+		address connector = msg.sender;
+		if (connectors.exists(connector)) {
+			Connector cr = connectors[connector];
+			TvmCell bodySTC = tvm.encodeBody(IDEXConnector(connector).setTransferCallback);
+			connector.transfer({value:  0.3 ton, bounce:true, flag: 0, body:bodySTC});
+			TvmCell bodySBC = tvm.encodeBody(IDEXConnector(connector).setBouncedCallback);
+			connector.transfer({value:  0.3 ton, bounce:true, flag: 0, body:bodySBC});
+			cr.status = true;
+			connectors[connector] = cr;
+			if (walletsCount == 0) {
+				voteForWalletDEX = wallet;
+				walletConnector[voteForWalletDEX] = connector;
+				walletsCount ++;
+			} else if (walletsCount == 1) {
+				voteAgainstWalletDEX = wallet;
+				walletConnector[voteAgainstWalletDEX] = connector;
+				walletsCount ++;
+			}
+		}
+	}
+
+	// Function to create Vote for update code.
+	function createVote(uint256 duration, TvmCell code, uint8 pointer) public checkOwnerAndAccept returns (bool isSuccess){
+		require (vote.isVotingNow == false, 111);
+		vote = Vote(uint256(now),duration,code,pointer,0,0,true);
+		isSuccess = true;
+	}
+
+	// Function to receive callbacks from VoteFor / VoteAgainst TONToken Wallets and processing.
+	function tokensReceivedCallback(
+		address token_wallet,
+		address token_root,
+		uint128 amount,
+		uint256 sender_public_key,
+		address sender_address,
+		address sender_wallet,
+		address original_gas_to,
+		uint128 updated_balance,
+		TvmCell payload
+	) public override {
+		tvm.rawReserve(address(this).balance - msg.value, 2);
+		if (msg.sender == voteForWalletDEX) {
+			vote.voteFor += amount;
+			address connector = walletConnector[voteForWalletDEX];
+			TvmBuilder builder;
+			builder.store(uint8(0));
+			TvmCell cell0 = builder.toCell();
+			TvmCell body = tvm.encodeBody(IDEXConnector(connector).transfer, sender_wallet, amount, cell0);
+			connector.transfer({value: 0.3 ton, bounce:true, body:body});
+			original_gas_to.transfer({value: 0, bounce:true, flag: 128});
+		} else if (msg.sender == voteAgainstWalletDEX) {
+			vote.voteAgainst += amount;
+			address connector = walletConnector[voteAgainstWalletDEX];
+			TvmBuilder builder;
+			builder.store(uint8(0));
+			TvmCell cell0 = builder.toCell();
+			TvmCell body = tvm.encodeBody(IDEXConnector(connector).transfer, sender_wallet, amount, cell0);
+			connector.transfer({value: 0.3 ton, bounce:true, body:body});
+			original_gas_to.transfer({value: 0, bounce:true, flag: 128});
+		} else {
+			msg.sender.transfer({value: 0, bounce:true, flag: 128});
+		}
+	}
+
+	// Vote count model selector
+	// Majority = 0;
+	// SoftMajority = 1;
+	// SuperMajority = 2;
+	function calculateVotes(uint32 yes, uint32 no, uint32 total, uint8 selector) public pure returns (bool) {
+		bool passed = false;
+		if (selector == 0) {
+			passed = (yes > no);
+		} else if (selector == 1) {
+			passed = (yes * total * 10 >= total * total + no * (8 * total  + 20));
+		} else if (selector == 2) {
+			passed = (yes * total * 3 >= total * total + no * (total + 6));
+		}
+		return passed;
+	}
+
+	// Function to create Vote for update code.
+	function resultVote() public view checkOwnerAndAccept returns (bool isSuccess){
+		require (vote.isVotingNow == true && uint256(now) >= vote.start + vote.duration, 112);
+		RootTokenContract(rootDEX).getDetails{value: 0.5 ton, flag: 0, callback: DEXroot.resultVoteCallback}();
+		isSuccess = true;
+	}
+
+	// A callback function for getDetails() from RootTokenContract for resultVote.
+	// pointers:
+	// codeDEXclient - 0;
+	// codeDEXpair - 1;
+	// codeDEXconnector - 2;
+	// codeRootToken - 3;
+	// codeTONTokenWallet - 4
+	function resultVoteCallback(IRootTokenContract.IRootTokenContractDetails value0) external {
+		require (msg.sender == rootDEX, 113);
+		tvm.rawReserve(address(this).balance - msg.value, 2);
+		bool result = calculateVotes(uint32(vote.voteFor), uint32(vote.voteAgainst), uint32(value0.total_supply), uint8(1));
+		TvmBuilder builder;
+		builder.store(uint8(0));
+		TvmCell code0 = builder.toCell();
+		if (result == true) {
+			if (vote.pointer == 0){
+				codeDEXclient = vote.code;
+			} else if (vote.pointer == 1) {
+				codeDEXpair = vote.code;
+			} else if (vote.pointer == 2) {
+				codeDEXconnector = vote.code;
+			} else if (vote.pointer == 3) {
+				codeRootToken = vote.code;
+			} else if (vote.pointer == 4) {
+				codeTONTokenWallet = vote.code;
+			}
+		}
+		vote = Vote(0,0,code0,0,0,0,false);
+		voteCount ++;
 	}
 
 }

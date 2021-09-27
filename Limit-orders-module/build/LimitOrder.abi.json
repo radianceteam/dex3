@@ -1,6 +1,5 @@
 {
 	"ABI version": 2,
-	"version": "2.1",
 	"header": ["time", "expire"],
 	"functions": [
 		{
@@ -122,23 +121,5 @@
 		{"key":1,"name":"_id","type":"uint256"}
 	],
 	"events": [
-	],
-	"fields": [
-		{"name":"_pubkey","type":"uint256"},
-		{"name":"_timestamp","type":"uint64"},
-		{"name":"_constructorFlag","type":"bool"},
-		{"name":"_codeIndex","type":"cell"},
-		{"name":"_addrRoot","type":"address"},
-		{"name":"_addrRouter","type":"address"},
-		{"name":"_addrOwner","type":"address"},
-		{"name":"_addrPair","type":"address"},
-		{"name":"_directionPair","type":"uint8"},
-		{"name":"_price","type":"uint128"},
-		{"name":"_amount","type":"uint128"},
-		{"name":"_walletOwnerRoot","type":"address"},
-		{"name":"_walletOwnerFrom","type":"address"},
-		{"name":"_walletOwnerTo","type":"address"},
-		{"name":"_status","type":"uint8"},
-		{"name":"_id","type":"uint256"}
 	]
 }

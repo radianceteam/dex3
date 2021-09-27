@@ -50,6 +50,27 @@ async function main(client) {
   response = await rootAcc.runLocal("hashRootTokenContract", {});
   console.log("Contract reacted to your hashRootTokenContract:", response.decoded.output);
 
+  response = await rootAcc.runLocal("rootDEX", {});
+  console.log("Contract reacted to your rootDEX:", response.decoded.output);
+
+  response = await rootAcc.runLocal("voteForWalletDEX", {});
+  console.log("Contract reacted to your voteForWalletDEX:", response.decoded.output);
+
+  response = await rootAcc.runLocal("voteAgainstWalletDEX", {});
+  console.log("Contract reacted to your voteAgainstWalletDEX:", response.decoded.output);
+
+  response = await rootAcc.runLocal("walletsCount", {});
+  console.log("Contract reacted to your walletsCount:", response.decoded.output);
+
+  response = await rootAcc.runLocal("connectors", {});
+  console.log("Contract reacted to your connectors:", response.decoded.output);
+
+  response = await rootAcc.runLocal("walletConnector", {});
+  console.log("Contract reacted to your walletConnector:", response.decoded.output);
+
+
+
+
 
 }
 

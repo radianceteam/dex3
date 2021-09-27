@@ -1,6 +1,5 @@
 {
 	"ABI version": 2,
-	"version": "2.1",
 	"header": ["pubkey", "time", "expire"],
 	"functions": [
 		{
@@ -100,7 +99,7 @@
 		{
 			"name": "getBalance",
 			"inputs": [
-				{"name":"answerId","type":"uint32"}
+				{"name":"_answer_id","type":"uint32"}
 			],
 			"outputs": [
 				{"name":"value0","type":"uint128"}
@@ -159,16 +158,5 @@
 		{"key":1,"name":"rootLimitOrder","type":"address"}
 	],
 	"events": [
-	],
-	"fields": [
-		{"name":"_pubkey","type":"uint256"},
-		{"name":"_timestamp","type":"uint64"},
-		{"name":"_constructorFlag","type":"bool"},
-		{"name":"rootLimitOrder","type":"address"},
-		{"name":"walletFor","type":"map(address,address)"},
-		{"name":"balanceFor","type":"map(address,uint128)"},
-		{"name":"counterCallback","type":"uint256"},
-		{"components":[{"name":"token_wallet","type":"address"},{"name":"token_root","type":"address"},{"name":"amount","type":"uint128"},{"name":"sender_public_key","type":"uint256"},{"name":"sender_address","type":"address"},{"name":"sender_wallet","type":"address"},{"name":"original_gas_to","type":"address"},{"name":"updated_balance","type":"uint128"},{"name":"payload_arg0","type":"uint8"},{"name":"payload_arg1","type":"address"},{"name":"payload_arg2","type":"address"},{"name":"payload_arg3","type":"uint128"},{"name":"payload_arg4","type":"uint128"}],"name":"callbacks","type":"map(uint256,tuple)"},
-		{"components":[{"name":"token_wallet","type":"address"},{"name":"token_root","type":"address"},{"name":"amount","type":"uint128"},{"name":"sender_public_key","type":"uint256"},{"name":"sender_address","type":"address"},{"name":"sender_wallet","type":"address"},{"name":"original_gas_to","type":"address"},{"name":"updated_balance","type":"uint128"},{"name":"payload_arg0","type":"uint8"},{"name":"payload_arg1","type":"address"},{"name":"payload_arg2","type":"address"},{"name":"payload_arg3","type":"uint128"},{"name":"payload_arg4","type":"uint128"}],"name":"exchangeCallbacks","type":"map(uint256,tuple)"}
 	]
 }

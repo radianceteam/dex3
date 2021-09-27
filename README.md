@@ -18,7 +18,7 @@
 ## DEX-core-smart-contracts web interface
  * https://trade.defispace.com
 
- * https://github.com/radianceteam/dex2front
+ * https://github.com/radianceteam/dex3front
 
 ## DEX-core-smart-contracts architecture with sharding optimization
 ![DEX-core-smart-contracts-architecture](DEX-core-smart-contracts-architecture.png)
@@ -29,20 +29,16 @@ https://docs.google.com/drawings/d/176G8UEKKl_HBiC55Fq_2GYG0pdHdxxJrvAhbCLuFzhM/
  * provide liquidity https://docs.google.com/drawings/d/1Cekvt35tKauEgWbGVz7-u0D6xJ6hhZux9-bmh0TBH-U/edit?usp=sharing
  * return liquidity https://docs.google.com/drawings/d/1_TZsYPI7mIat6N2wYxS8tSWqMOcsKc3ze1WxeXHZTv8/edit?usp=sharing
 
-## DEX-core-smart-contracts net.ton.dev implementation
+## DEX-core-smart-contracts main.ton.dev implementation
 - RootTokenContract.sol
-  * wTON https://net.ton.live/accounts/accountDetails?id=0%3A8ef414bdf6f3bf4b02a21e5f78a5e65a9f72aedb3b098e6fd68f54910648811a
-  * wUSDT https://net.ton.live/accounts/accountDetails?id=0%3A2cf5f485b8cd4ce3b4eb85100a1d9a86f8c8b59f12475331403f4e8ba12086ba
-  * wBTC https://net.ton.live/accounts/accountDetails?id=0%3A06bb5c37c26aab855dc9de3fa01920523a4589a04e98009e0a902985fd49754c
-  * wETH https://net.ton.live/accounts/accountDetails?id=0%3A0983f2ffb833c55a09f148843d1586af4303e469079a48626ba0b98fda422d3b
+  * WTON https://ton.live/accounts/accountDetails?id=0%3A0ee39330eddb680ce731cd6a443c71d9069db06d149a9bec9569d1eb8d04eb37
+  * USDT https://ton.live/accounts/accountDetails?id=0%3A751b6e22687891bdc1706c8d91bf77281237f7453d27dc3106c640ec165a2abf
 
 - DEXRoot.sol
-  * https://net.ton.live/accounts/accountDetails?id=0%3Aeaaaffaa24457d6088fca0732cf00172cd854e9ca26d42434ded9ada297dfa62
+  * https://ton.live/accounts/accountDetails?id=0%3A5d0f5a8cb443e00934d1bb632acadc036a6c41b59308e3a36d809449a5e777d9
 
 - DEXPair.sol
-  * wTON-wUSDT https://net.ton.live/accounts/accountDetails?id=0%3Aea6eb680edde63e39b1053c415c8e31e3d998b0fc7af0132e5130c8841b33327
-  * wTON-wBTC https://net.ton.live/accounts/accountDetails?id=0%3Aeb780b9173cd7b8551b7a375e981d7cfad54f0ef29af4b0ea6a569106b03d193
-  * wTON-wETH https://net.ton.live/accounts/accountDetails?id=0%3Ae7c18018720b9a612017bee9894444eae154f8b489856b414ef508f3c45c9b27
+  * wTON-wUSDT https://ton.live/accounts/accountDetails?id=0%3A5ed8c97d370b1684590e2ba04370734fd5e5fb2c5900d03791aab8b47afd79ef
 
 ## DEX-core-smart-contracts tests
 
@@ -53,7 +49,7 @@ https://docs.google.com/drawings/d/176G8UEKKl_HBiC55Fq_2GYG0pdHdxxJrvAhbCLuFzhM/
 #### `npm install`
 #### `cat selector > .env`
 
-### operation tests for  DEX-core-smart-contracts
+### net.ton.dev operation tests for  DEX-core-smart-contracts
 Tests for dex operations: swap tokenA / tokenB, swap tokenB / tokenA, provde liquidity and return liquidity. During tests observe that the change in the DEX client's wallet balances during operations is equal to the mathematics embedded in the smart contract.
 
 #### `npm run test:swapA`

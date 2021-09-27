@@ -82,6 +82,8 @@ async function swapA(client,item) {
   let idealQtyB =  Math.round(((qtyA*997/1000)*reserveB) / reserveA);
   logger.log("((qtyA-fee(0.3%))*reserveB) / reserveA): ", idealQtyB);
   let getAmountOutResult = getAmountOut(qtyA, reserveA, reserveB);
+  let minQtyB = Math.round((getAmountOutResult/100)*99);
+  let maxQtyB = Math.round((getAmountOutResult/100)*101);
   logger.log("computed getAmountOut: ", getAmountOutResult);
   logger.log("shift %: ", ((idealQtyB / getAmountOutResult))*100-100);
   response = await clientAcc.runLocal("rootWallet", {});
@@ -97,7 +99,7 @@ async function swapA(client,item) {
   grammsBefore = response.decoded.output.value0;
   logger.log("client TON gramm balance before:", grammsBefore);
   timeBefore = Date.now();
-  responce = await clientAcc.run("processSwapA", {pairAddr:pairAddr,qtyA:qtyA});
+  responce = await clientAcc.run("processSwapA", {pairAddr:pairAddr,qtyA:qtyA,minQtyB:minQtyB,maxQtyB:maxQtyB});
   return responce.decoded.output.processSwapStatus;
 }
 
@@ -162,6 +164,8 @@ async function swapB(client,item) {
   let idealQtyA =  Math.round(((qtyB*997/1000)*reserveA) / reserveB);
   logger.log("((qtyB-fee(0.3%))*reserveB) / reserveA): ", idealQtyA);
   let getAmountOutResult = getAmountOut(qtyB, reserveB, reserveA);
+  let minQtyA = Math.round((getAmountOutResult/100)*99);
+  let maxQtyA = Math.round((getAmountOutResult/100)*101);
   logger.log("computed getAmountOut: ", getAmountOutResult);
   logger.log("shift %: ", ((idealQtyA / getAmountOutResult))*100-100);
   response = await clientAcc.runLocal("rootWallet", {});
@@ -177,7 +181,7 @@ async function swapB(client,item) {
   grammsBefore = response.decoded.output.value0;
   logger.log("client TON gramm balance before:", grammsBefore);
   timeBefore = Date.now();
-  responce = await clientAcc.run("processSwapB", {pairAddr:pairAddr,qtyB:qtyB});
+  responce = await clientAcc.run("processSwapB", {pairAddr:pairAddr,qtyB:qtyB,minQtyA:minQtyA,maxQtyA:maxQtyA});
   return responce.decoded.output.processSwapStatus;
 }
 

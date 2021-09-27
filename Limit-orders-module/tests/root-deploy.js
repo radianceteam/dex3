@@ -24,8 +24,8 @@ const zeroAddress = '0:000000000000000000000000000000000000000000000000000000000
 
 const wtonRoot = JSON.parse(fs.readFileSync(pathWTON,{encoding: "utf8"})).address;
 const usdtRoot = JSON.parse(fs.readFileSync(pathUSDT,{encoding: "utf8"})).address;
-const btcRoot = JSON.parse(fs.readFileSync(pathBTC,{encoding: "utf8"})).address;
-const ethRoot = JSON.parse(fs.readFileSync(pathETH,{encoding: "utf8"})).address;
+// const btcRoot = JSON.parse(fs.readFileSync(pathBTC,{encoding: "utf8"})).address;
+// const ethRoot = JSON.parse(fs.readFileSync(pathETH,{encoding: "utf8"})).address;
 
 
 TonClient.useBinaryLibrary(libNode);
@@ -94,7 +94,9 @@ async function main(client) {
 
     const keyJson = JSON.stringify({address:address, keys:rootKeys, seed:phrase});
     fs.writeFileSync( pathJson, keyJson,{flag:'w'});
-    console.log("rootArr:", [wtonRoot,usdtRoot,btcRoot,ethRoot]);
+    // console.log("rootArr:", [wtonRoot,usdtRoot,btcRoot,ethRoot]);
+    console.log("rootArr:", [wtonRoot,usdtRoot]);
+
 
     console.log("Future address of the contract  and keys written successfully to:", pathJson);
 
@@ -104,7 +106,8 @@ async function main(client) {
         codeIndex:IndexContract.code,
         codeOrder:LimitOrderContract.code,
         codeRouter:LimitOrderRouterContract.code,
-        rootArr:[wtonRoot,usdtRoot,btcRoot,ethRoot],
+        // rootArr:[wtonRoot,usdtRoot,btcRoot,ethRoot],
+        rootArr:[wtonRoot,usdtRoot],
       },
     }));
     let shard_block_id;

@@ -12,6 +12,8 @@ const { TONTokenWalletContract } = require("./TONTokenWallet.js");
 const { GiverContract } = require("./Giver.js");
 const fs = require('fs');
 const pathJson = './DEXRootContract.json';
+const pathJsonDEX = './DEXdata.json';
+
 const dotenv = require('dotenv').config();
 const networks = ["http://localhost",'net.ton.dev','main.ton.dev','rustnet.ton.dev','https://gql.custler.net'];
 const hello = ["Hello localhost TON!","Hello dev net TON!","Hello main net TON!","Hello rust dev net TON!","Hello fld dev net TON!"];
@@ -65,10 +67,17 @@ async function main(client) {
   fs.writeFileSync( pathJson, keyJson,{flag:'w'});
   console.log("Future address of the contract  and keys written successfully to:", pathJson);
 
+  const dexAddr = JSON.parse(fs.readFileSync(pathJsonDEX,{encoding: "utf8"})).address;
 
   const deployMessage = await client.abi.encode_message(await rootAcc.getParamsOfDeployMessage({
     initFunctionName:"constructor",
     initInput:{
+      _rootDEX:dexAddr,
+      _souintFor:0,
+      _souintAgainst:1,
+      _gramsToConnector:1_100_000_000,
+      _gramsToRoot:3_200_000_000,
+      _codeConnector:DEXConnectorContract.code,
     },
   }));
   let shard_block_id;
@@ -98,8 +107,8 @@ console.log(`Contract was deployed at address: ${address}`);
 
 
 // Call `setDEXconnectorCode` function
-response = await rootAcc.run("setDEXconnectorCode", {code:DEXConnectorContract.code});
-console.log("Contract reacted to your setDEXconnectorCode:", response.decoded.output);
+// response = await rootAcc.run("setDEXconnectorCode", {code:DEXConnectorContract.code});
+// console.log("Contract reacted to your setDEXconnectorCode:", response.decoded.output);
 
 // Call `setDEXclientCode` function
 response = await rootAcc.run("setDEXclientCode", {code:DEXClientContract.code});
