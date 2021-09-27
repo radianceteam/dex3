@@ -7,34 +7,27 @@ Node.js latest version installed
 ## Add Free TON SDK to your App https://github.com/tonlabs/TON-SDK
 
  - Let's start with a clean npm project.
-       `mkdir defi-space-dex
-        cd defi-space-dex
-        npm init -y`
+        `mkdir defi-space-dex`
+        `cd defi-space-dex`
+        `npm init -y`
 
  - Now lets install core package and bridge package for Node.js
-      `npm i --save @tonclient/core
-       npm i --save @tonclient/lib-node
-       npm i --save @tonclient/appkit`   
+       `npm i --save @tonclient/core`
+       `npm i --save @tonclient/lib-node`
+       `npm i --save @tonclient/appkit `
 
  - Create index.js file and add this code:
 
-      `const {TonClient, abiContract, signerKeys} = require("@tonclient/core");
+       `const {TonClient, abiContract, signerKeys} = require("@tonclient/core");
        const { libNode } = require("@tonclient/lib-node");
        const { Account } = require("@tonclient/appkit");
        const network = 'main.ton.dev';
        const hello = "Hello main net TON!";
-
        // YOU WILL ADD DefiSpase js-packages HERE
-
-
        TonClient.useBinaryLibrary(libNode);
-
        async function main(client) {
-
         // YOU WILL ADD ABI compatible get methods HERE
-
       }
-
       (async () => {
       const client = new TonClient({network: { endpoints: network,},});
       try {
@@ -79,10 +72,8 @@ Node.js latest version installed
 
       `response = await rootAcc.runLocal("pairs", {});
        console.log("Contract reacted to your pairs:", response.decoded.output);
-
        response = await rootAcc.runLocal("pairKeys", {});
        console.log("Contract reacted to your pairKeys:", response.decoded.output);
-
        response = await rootAcc.runLocal("hashRootTokenContract", {});
        console.log("Contract reacted to your hashRootTokenContract:", response.decoded.output);`
 
@@ -103,37 +94,25 @@ Node.js latest version installed
 
        `response = await pairAcc.runLocal("rootDEX", {});
         console.log("Contract reacted to your rootDEX:", response.decoded.output);
-
         response = await pairAcc.runLocal("rootA", {});
         console.log("Contract reacted to your rootA:", response.decoded.output);
-
         let rootA = response.decoded.output.rootA;
-
         response = await pairAcc.runLocal("rootB", {});
         console.log("Contract reacted to your rootB:", response.decoded.output);
-
         let rootB = response.decoded.output.rootB;
-
         response = await pairAcc.runLocal("rootAB", {});
         console.log("Contract reacted to your rootAB:", response.decoded.output);
-
         let rootAB = response.decoded.output.rootAB;
-
         response = await pairAcc.runLocal("walletReserve", {});
         console.log("Contract reacted to your walletReserve:", response.decoded.output);
-
         let walletRootA = response.decoded.output.walletReserve[rootA];
         let walletRootB = response.decoded.output.walletReserve[rootB];
-
         const walletAccA = new Account(TONTokenWalletContract, {address: walletRootA,client,});
         const walletAccB = new Account(TONTokenWalletContract, {address: walletRootB,client,});
-
         response = await walletAccA.runLocal("balance", {_answer_id:0});
         console.log("Pair walletAccA reacted to your balance:", response.decoded.output);
-
         response = await walletAccB.runLocal("balance", {_answer_id:0});
         console.log("Pair walletAccB reacted to your balance:", response.decoded.output);
-
         response = await pairAcc.runLocal("balanceReserve", {});
         console.log("Contract reacted to your balanceReserve:", response.decoded.output);`
 
