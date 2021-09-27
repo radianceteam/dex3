@@ -18,7 +18,7 @@
 ## DEX-core-smart-contracts web interface
  * https://trade.defispace.com
 
- * https://github.com/radianceteam/dex3front
+ * https://github.com/radianceteam/defispace-front
 
 ## DEX-core-smart-contracts architecture with sharding optimization
 ![DEX-core-smart-contracts-architecture](DEX-core-smart-contracts-architecture.png)
