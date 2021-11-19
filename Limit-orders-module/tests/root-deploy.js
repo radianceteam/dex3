@@ -9,10 +9,10 @@ const { GiverContract } = require("../ton-packages/Giver.js");
 const fs = require('fs');
 const pathJson = '../keys/LimitOrderRoot.json';
 
-const pathWTON = '../keys/WTONdata.json';
-const pathUSDT = '../keys/USDTdata.json';
-const pathBTC = '../keys/BTCdata.json';
-const pathETH = '../keys/ETHdata.json';
+const pathWTON = '../../DEX-core-smart-contracts/tests-dex-ntd/WTONdata.json';
+const pathUSDT = '../../DEX-core-smart-contracts/tests-dex-ntd/USDTdata.json';
+const pathBTC = '../../DEX-core-smart-contracts/tests-dex-ntd/BTCdata.json';
+const pathETH = '../../DEX-core-smart-contracts/tests-dex-ntd/ETHdata.json';
 
 
 const dotenv = require('dotenv').config();
